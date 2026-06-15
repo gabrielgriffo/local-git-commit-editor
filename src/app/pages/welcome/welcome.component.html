@@ -1,0 +1,105 @@
+<div class="welcome-page">
+
+  <!-- Background decoration -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- Center card -->
+  <div class="welcome-card anim-scale-in">
+
+    <!-- Logo -->
+    <div class="logo-block">
+      <div class="logo-icon">
+        <img src="assets/app.svg" alt="LGCEdit logo" />
+      </div>
+      <div>
+        <h1 class="logo-title">LGCEdit</h1>
+        <p class="logo-sub">Local Git Commit Editor</p>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- Input section -->
+    <div class="input-section">
+      <label class="input-label">Repository path</label>
+      <div class="input-row">
+        <input
+          class="input path-input"
+          type="text"
+          placeholder="/Users/you/projects/my-repo"
+          [value]="path()"
+          (input)="path.set($any($event.target).value)"
+          (keydown)="onKeydown($event)"
+          autofocus />
+        <button class="btn btn-secondary" (click)="browse()" [disabled]="isLoading()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <rect x="1" y="3" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M1 5.5h11" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M4 3V2a1 1 0 011-1h3a1 1 0 011 1v1" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          Browse
+        </button>
+      </div>
+
+      @if (error()) {
+        <div class="error-msg anim-fade-in">
+          <div class="error-body">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0">
+              <circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="6" y1="4" x2="6" y2="6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <circle cx="6" cy="8.5" r="0.6" fill="currentColor"/>
+            </svg>
+            {{ error() }}
+          </div>
+          <div class="error-timer"></div>
+        </div>
+      }
+
+      <button
+        class="btn btn-primary open-btn"
+        (click)="open()"
+        [disabled]="isLoading() || !path().trim()">
+        @if (isLoading()) {
+          <span class="spinner"></span>
+          Opening…
+        } @else {
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M2 6.5h9M7.5 3l3.5 3.5L7.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Open Repository
+        }
+      </button>
+    </div>
+
+    <!-- Recent -->
+    @if (recentRepos().length > 0) {
+      <div class="recent-section">
+        <span class="recent-label">Recent</span>
+        @for (p of recentRepos(); track p) {
+          <button class="recent-item" (click)="open(p)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <rect x="0.5" y="2" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.1"/>
+              <path d="M0.5 5h11" stroke="currentColor" stroke-width="1.1"/>
+            </svg>
+            <span class="recent-name">{{ baseName(p) }}</span>
+            <span class="recent-path">{{ p }}</span>
+            <svg class="recent-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Safety note -->
+    <p class="safety-note">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M6 1L1.5 3.5v3C1.5 9 3.5 11 6 11c2.5 0 4.5-2 4.5-4.5v-3L6 1z" stroke="currentColor" stroke-width="1.1"/>
+        <path d="M4 6l1.5 1.5L8 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Never pushes, fetches, or contacts any remote. Local edits only.
+    </p>
+  </div>
+
+</div>

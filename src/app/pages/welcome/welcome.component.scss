@@ -1,0 +1,226 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+
+.welcome-page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--canvas);
+  overflow: hidden;
+}
+
+/* Grid decoration */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+  pointer-events: none;
+}
+
+/* Card */
+.welcome-card {
+  position: relative;
+  width: 440px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+/* Logo */
+.logo-block {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+
+  img{
+    width: 45px;
+    height: 45px;
+  }
+}
+
+.logo-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--ink-1);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.logo-sub {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+.divider { height: 1px; background: var(--border); }
+
+/* Input */
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.input-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.input-row {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.path-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.open-btn {
+  width: 100%;
+  height: 36px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  justify-content: center;
+  margin-top: var(--sp-1);
+}
+
+.error-msg {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--text-sm);
+  color: var(--danger);
+  background: var(--danger-lo);
+  border: 1px solid rgba(224, 82, 82, 0.2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.error-body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  line-height: 1.5;
+}
+
+.error-timer {
+  height: 2px;
+  background: var(--danger);
+  opacity: 0.5;
+  transform-origin: left;
+  animation: error-countdown 10s linear forwards;
+}
+
+@keyframes error-countdown {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Recent */
+.recent-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.recent-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  min-width: 0;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+
+  &:hover {
+    background: var(--accent-lo);
+    border-color: rgba(74, 144, 226, 0.2);
+    color: var(--accent);
+
+    .recent-path { color: var(--accent); opacity: 0.7; }
+  }
+}
+
+.recent-name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-1);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.recent-path {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  min-width: 0;
+  transition: color var(--t-fast);
+}
+
+.recent-arrow { flex-shrink: 0; }
+
+/* Safety note */
+.safety-note {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--ink-4);
+}

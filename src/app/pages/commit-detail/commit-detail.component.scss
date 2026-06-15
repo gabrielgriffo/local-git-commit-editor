@@ -1,0 +1,193 @@
+:host { display: block; height: 100%; }
+
+.sep { color: var(--ink-4); font-size: var(--text-sm); }
+.pushed-warning {
+  display: flex; align-items: center; gap: 5px;
+  font-size: var(--text-xs); color: var(--warning);
+  background: var(--warning-lo); border: 1px solid rgba(210,153,34,0.2);
+  border-radius: var(--radius-sm); padding: 3px 8px;
+}
+
+.detail-content {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.section {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Message view */
+.message-display { padding: var(--sp-4); }
+.message-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--ink-1);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+}
+
+/* Editor */
+.message-editor {
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.message-textarea {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  width: 100%;
+  min-height: 120px;
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+
+/* Confirm panel */
+.confirm-panel {
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.confirm-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--warning-lo);
+  border-bottom: 1px solid rgba(210,153,34,0.2);
+  font-size: var(--text-sm);
+  color: var(--warning);
+}
+
+.diff-block {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  align-items: start;
+}
+
+.diff-arrow {
+  color: var(--ink-3);
+  padding-top: 28px;
+  font-size: var(--text-lg);
+}
+
+.diff-side { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+.diff-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  &.removed { color: var(--danger); }
+  &.added   { color: var(--success); }
+}
+
+.diff-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-1);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  min-height: 60px;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--border);
+}
+
+.error-inline {
+  padding: var(--sp-2) var(--sp-4) var(--sp-3);
+  font-size: var(--text-sm);
+  color: var(--danger);
+}
+
+/* Metadata grid */
+.meta-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  align-items: baseline;
+  &:last-child { border-bottom: none; }
+}
+
+.meta-key {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.meta-val {
+  font-size: var(--text-sm);
+  color: var(--ink-1);
+  word-break: break-all;
+}
+
+.meta-rel { color: var(--ink-3); font-size: var(--text-xs); margin-left: var(--sp-2); }
+
+.parents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.spinner-sm {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

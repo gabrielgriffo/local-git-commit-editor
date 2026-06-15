@@ -1,0 +1,166 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Batch Date Shift</h1>
+    <span class="sel-badge">{{ selectedCount() }} selected</span>
+    <div class="header-spacer"></div>
+    @if (hasPreview()) {
+      <div class="delta-display">
+        <span>Shift</span>
+        <code class="delta-val">{{ formatDelta(pendingDelta()) }}</code>
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="clearPreview()">Reset</button>
+      <button class="btn btn-primary btn-sm" (click)="showConfirm.set(true)">
+        Apply to {{ selectedCount() }} commits
+      </button>
+    }
+  </div>
+
+  <div class="page-content">
+    <div class="batch-layout">
+
+      <!-- ── Quick adjust panel ──────────────────────────────────── -->
+      <div class="adjust-sidebar card">
+        <div class="panel-title">Quick Adjust</div>
+
+        <div class="adjust-section">
+          <span class="adj-label">Hours</span>
+          <div class="adj-grid">
+            @for (v of [-1,-2,-5,1,2,5]; track v) {
+              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
+                      (click)="addDelta(v * 3600)">
+                {{ v > 0 ? '+' : '' }}{{ v }}h
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="adjust-section">
+          <span class="adj-label">Days</span>
+          <div class="adj-grid">
+            @for (v of [-1,-2,-5,1,2,5]; track v) {
+              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
+                      (click)="addDelta(v * 86400)">
+                {{ v > 0 ? '+' : '' }}{{ v }}d
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="adjust-section">
+          <span class="adj-label">Weeks</span>
+          <div class="adj-grid">
+            @for (v of [-1,1]; track v) {
+              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
+                      (click)="addDelta(v * 7 * 86400)">
+                {{ v > 0 ? '+' : '' }}{{ v }}w
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="adjust-section">
+          <span class="adj-label">Months</span>
+          <div class="adj-grid">
+            @for (v of [-1,1]; track v) {
+              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
+                      (click)="addDelta(v * 30 * 86400)">
+                {{ v > 0 ? '+' : '' }}{{ v }}mo
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (pendingDelta() !== 0) {
+          <div class="total-delta">
+            <span class="total-label">Total shift</span>
+            <code class="total-val">{{ formatDelta(pendingDelta()) }}</code>
+          </div>
+        }
+      </div>
+
+      <!-- ── Commit table ────────────────────────────────────────── -->
+      <div class="commit-table card">
+        <div class="table-header">
+          <label class="checkbox-cell">
+            <input type="checkbox"
+              [checked]="allSelected()"
+              (change)="selectAll()" />
+          </label>
+          <span class="col-hash">SHA</span>
+          <span class="col-msg">Message</span>
+          <span class="col-time">Original Time</span>
+          <span class="col-new">New Time</span>
+        </div>
+        <div class="table-body">
+          @for (row of rows(); track row.commit.sha) {
+            <div class="table-row"
+                 [class.selected]="row.selected"
+                 [class.preview]="row.previewTime !== null"
+                 [class.is-pushed]="row.commit.is_pushed">
+              <label class="checkbox-cell" (click)="$event.stopPropagation()">
+                <input type="checkbox"
+                  [checked]="row.selected"
+                  [disabled]="row.commit.is_pushed"
+                  (change)="toggleRow(row.commit.sha)" />
+              </label>
+              <code class="col-hash hash-chip">{{ row.commit.short_sha }}</code>
+              <span class="col-msg msg-text">
+                {{ row.commit.title }}
+                @if (row.commit.is_pushed) {
+                  <span class="pushed-tag">pushed</span>
+                }
+              </span>
+              <span class="col-time mono time-text">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
+              <span class="col-new mono">
+                @if (row.previewTime !== null) {
+                  <span class="new-time">{{ row.previewTime | formatDate: 'datetime' }}</span>
+                } @else {
+                  <span class="no-change">—</span>
+                }
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Confirmation overlay ──────────────────────────────────────── -->
+  @if (showConfirm()) {
+    <div class="overlay anim-fade-in" (click)="showConfirm.set(false)">
+      <div class="confirm-dialog anim-scale-in" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h2>Confirm Batch Shift</h2>
+          <p>{{ selectedCount() }} commit(s) will be shifted by <strong>{{ formatDelta(pendingDelta()) }}</strong>.</p>
+          <p class="warn">This rewrites history — all shifted commits and their descendants will receive new SHAs.</p>
+        </div>
+        <div class="dialog-body">
+          @for (row of selectedRows(); track row.commit.sha) {
+            <div class="preview-item">
+              <code class="hash-chip">{{ row.commit.short_sha }}</code>
+              <span class="preview-msg">{{ row.commit.title }}</span>
+              <div class="preview-times mono">
+                <span class="old">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
+                <span>→</span>
+                <span class="new">{{ row.previewTime! | formatDate: 'datetime' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+        @if (error()) {
+          <p class="error-inline">{{ error() }}</p>
+        }
+        <div class="dialog-footer">
+          <button class="btn btn-ghost" (click)="showConfirm.set(false)">Cancel</button>
+          <button class="btn btn-primary" (click)="apply()" [disabled]="isSaving()">
+            @if (isSaving()) { <span class="spinner-sm"></span> Applying… }
+            @else { Apply Shift }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

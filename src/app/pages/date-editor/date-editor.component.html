@@ -1,0 +1,167 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Date Editor</h1>
+    <span class="badge badge-local">{{ rows().length }} commit{{ rows().length !== 1 ? 's' : '' }}</span>
+    <div class="header-spacer"></div>
+    @if (anyChanged()) {
+      <button class="btn btn-primary btn-sm" (click)="showConfirm.set(true)">
+        Preview &amp; Apply
+      </button>
+    }
+  </div>
+
+  <div class="page-content">
+    <div class="editor-layout">
+
+      <!-- ── Commit list ────────────────────────────────────────── -->
+      <div class="commit-panel card">
+        <div class="panel-title">Commits</div>
+        @for (row of rows(); track row.commit.sha; let i = $index) {
+          <div class="commit-row-item"
+               [class.active]="activeIdx() === i"
+               [class.changed]="row.changed"
+               [class.is-pushed]="row.commit.is_pushed"
+               (click)="activateRow(i)">
+            <div class="commit-row-top">
+              <code class="hash-chip">{{ row.commit.short_sha }}</code>
+              <span class="commit-msg-short">{{ row.commit.title }}</span>
+              @if (row.commit.is_pushed) {
+                <span class="pushed-badge">pushed</span>
+              } @else if (row.changed) {
+                <span class="diff-badge">{{ timeDiff(row.commit.author_time, row.newAuthorTime) }}</span>
+              }
+            </div>
+            <div class="time-comparison mono">
+              <span class="orig-time">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
+              @if (row.changed) {
+                <span class="arrow">→</span>
+                <span class="new-time">{{ row.newAuthorTime | formatDate: 'datetime' }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ── Editor panel ──────────────────────────────────────── -->
+      <div class="edit-panel">
+
+        @if (activeIsPushed()) {
+          <div class="pushed-warning card">
+            <span class="pushed-warning-icon">⚠</span>
+            <div>
+              <p class="pushed-warning-title">This commit has been pushed</p>
+              <p class="pushed-warning-body">Rewriting its date would rewrite shared history. Select a local or unpushed commit to edit.</p>
+            </div>
+          </div>
+        }
+
+        <!-- Date/time inputs -->
+        <div class="card input-card" [class.panel-disabled]="activeIsPushed()">
+          <div class="panel-title">Set Date &amp; Time</div>
+          <div class="dt-inputs">
+            <div class="dt-field">
+              <label class="dt-label">Date</label>
+              <input class="input mono" type="date"
+                [value]="dateInput()"
+                [disabled]="activeIsPushed()"
+                (input)="dateInput.set($any($event.target).value)"
+                (change)="applyInputToRow()" />
+            </div>
+            <div class="dt-field">
+              <label class="dt-label">Time</label>
+              <input class="input mono" type="time"
+                [value]="timeInput()"
+                [disabled]="activeIsPushed()"
+                (input)="timeInput.set($any($event.target).value)"
+                (change)="applyInputToRow()" />
+            </div>
+          </div>
+          <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-top:var(--sp-3)"
+                  [disabled]="activeIsPushed()"
+                  (click)="applyInputToRow()">
+            Apply to Selected Commit
+          </button>
+        </div>
+
+        <!-- Quick adjust -->
+        <div class="card quick-card">
+          <div class="panel-title">Shift All Editable</div>
+          <div class="adjust-groups">
+            <div class="adjust-group">
+              <span class="group-label">Hours</span>
+              <div class="adjust-row">
+                @for (h of [1,2,5]; track h) {
+                  <button class="adj-btn adj-btn--minus" (click)="shiftAll(-h * 3600)">-{{ h }}h</button>
+                }
+                @for (h of [1,2,5]; track h) {
+                  <button class="adj-btn adj-btn--plus"  (click)="shiftAll(+h * 3600)">+{{ h }}h</button>
+                }
+              </div>
+            </div>
+            <div class="adjust-group">
+              <span class="group-label">Days</span>
+              <div class="adjust-row">
+                @for (d of [1,2,5]; track d) {
+                  <button class="adj-btn adj-btn--minus" (click)="shiftAll(-d * 86400)">-{{ d }}d</button>
+                }
+                @for (d of [1,2,5]; track d) {
+                  <button class="adj-btn adj-btn--plus"  (click)="shiftAll(+d * 86400)">+{{ d }}d</button>
+                }
+              </div>
+            </div>
+            <div class="adjust-group">
+              <span class="group-label">Weeks &amp; Months</span>
+              <div class="adjust-row">
+                <button class="adj-btn adj-btn--minus" (click)="shiftAll(-7 * 86400)">-1w</button>
+                <button class="adj-btn adj-btn--plus"  (click)="shiftAll(+7 * 86400)">+1w</button>
+                <button class="adj-btn adj-btn--minus" (click)="shiftAll(-30 * 86400)">-1mo</button>
+                <button class="adj-btn adj-btn--plus"  (click)="shiftAll(+30 * 86400)">+1mo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Confirmation overlay ──────────────────────────────────────── -->
+  @if (showConfirm()) {
+    <div class="overlay anim-fade-in" (click)="showConfirm.set(false)">
+      <div class="confirm-dialog anim-scale-in" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h2>Confirm Date Changes</h2>
+          <p>{{ changedCount() }} commit(s) will be rewritten.</p>
+        </div>
+        <div class="dialog-body">
+          @for (row of rows(); track row.commit.sha) {
+            @if (row.changed) {
+              <div class="preview-row">
+                <code class="hash-chip">{{ row.commit.short_sha }}</code>
+                <span class="preview-msg">{{ row.commit.title }}</span>
+                <div class="preview-times mono">
+                  <span class="old">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
+                  <span class="arr">→</span>
+                  <span class="new">{{ row.newAuthorTime | formatDate: 'datetime' }}</span>
+                  <span class="diff-badge">{{ timeDiff(row.commit.author_time, row.newAuthorTime) }}</span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+        @if (error()) {
+          <p class="error-inline">{{ error() }}</p>
+        }
+        <div class="dialog-footer">
+          <button class="btn btn-ghost" (click)="showConfirm.set(false)">Cancel</button>
+          <button class="btn btn-primary" (click)="apply()" [disabled]="isSaving()">
+            @if (isSaving()) { <span class="spinner-sm"></span> Applying… }
+            @else { Apply Changes }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

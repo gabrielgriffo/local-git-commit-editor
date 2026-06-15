@@ -1,0 +1,62 @@
+<aside class="sidebar">
+
+  <!-- App header -->
+  <div class="sidebar-header">
+    <div class="app-logo">
+      <img src="assets/app.svg" alt="LGCEdit logo" />
+    </div>
+    <span class="app-name">LGCEdit</span>
+  </div>
+
+  <!-- Repo info -->
+  <div class="repo-info">
+    <div class="repo-name" [title]="repoName()">{{ repoName() }}</div>
+    <div class="repo-meta">
+      <span class="branch-indicator">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <circle cx="2" cy="2" r="1.5" stroke="currentColor" stroke-width="1.2"/>
+          <circle cx="8" cy="8" r="1.5" stroke="currentColor" stroke-width="1.2"/>
+          <circle cx="8" cy="2" r="1.5" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M2 3.5v3a1.5 1.5 0 001.5 1.5H6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="8" y1="3.5" x2="8" y2="6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        {{ branch() }}
+      </span>
+      @if (unpushed() > 0) {
+        <span class="unpushed-count">{{ unpushed() }} ahead</span>
+      }
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    @for (item of nav; track item.route) {
+      <a class="nav-item"
+         [routerLink]="item.route"
+         routerLinkActive="nav-item--active">
+        <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-spacer"></div>
+
+  <!-- Secondary nav -->
+  <nav class="sidebar-nav sidebar-nav--secondary">
+    @for (item of secondary; track item.route) {
+      <a class="nav-item"
+         [routerLink]="item.route"
+         routerLinkActive="nav-item--active">
+        <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+
+    <button class="nav-item nav-item--close" (click)="closeRepo()" title="Close repository">
+      <span class="nav-icon" [innerHTML]="getIcon('close')"></span>
+      <span class="nav-label">Close Repo</span>
+    </button>
+  </nav>
+
+</aside>

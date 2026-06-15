@@ -1,0 +1,69 @@
+<div class="page">
+  <div class="page-header"><h1>Settings</h1></div>
+
+  <div class="page-content">
+    <div class="settings-layout">
+
+      <section class="settings-section card">
+        <h2 class="section-title">General</h2>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Commits to load</div>
+            <div class="setting-desc">Maximum number of commits to load per repository.</div>
+          </div>
+          <select class="input" style="width:100px"
+            [value]="commitLimit()"
+            (change)="commitLimit.set(+$any($event.target).value)">
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Confirm before applying</div>
+            <div class="setting-desc">Show a confirmation dialog before rewriting commits.</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox"
+              [checked]="confirmEdits()"
+              (change)="confirmEdits.set($any($event.target).checked)" />
+            <span class="track"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Auto-backup before edits</div>
+            <div class="setting-desc">Automatically create a backup snapshot before any rewrite.</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox"
+              [checked]="autoBackup()"
+              (change)="autoBackup.set($any($event.target).checked)" />
+            <span class="track"></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="settings-section card">
+        <h2 class="section-title">Safety</h2>
+        <div class="safety-note">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1.5L1.5 5.5v4C1.5 12.5 4.5 14.5 8 14.5s6.5-2 6.5-5v-4L8 1.5z" stroke="var(--success)" stroke-width="1.3"/>
+            <path d="M5 8l2 2 4-4" stroke="var(--success)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div>
+            <strong>This app never performs remote operations.</strong><br/>
+            Push, pull, fetch, merge, and sync operations are permanently disabled.
+            Only local &lt;code&gt;.git&lt;/code&gt; history is ever modified.
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,84 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Timeline</h1>
+    <span class="badge badge-local">{{ totalCommits() }} commits</span>
+  </div>
+
+  <div class="page-content">
+    @if (nodes().length === 0) {
+      <div class="empty-state">
+        <p class="empty-title">No commits to display</p>
+      </div>
+    } @else {
+      <div class="timeline-layout">
+
+        <!-- Date axis labels -->
+        <div class="axis">
+          <div class="axis-top mono">{{ newest() | formatDate: 'datetime' }}</div>
+          <div class="axis-spacer"></div>
+          <div class="axis-bottom mono">{{ oldest() | formatDate: 'datetime' }}</div>
+        </div>
+
+        <!-- Timeline track -->
+        <div class="track">
+          <div class="track-rail"></div>
+
+          @for (node of nodes(); track node.commit.sha; let i = $index) {
+            @if (i > 0) {
+              <div class="gap-spacer" [style.height.px]="node.gapPx">
+                @if (node.gapMinutes > 60) {
+                  <div class="gap-label">
+                    {{ node.gapMinutes >= 1440
+                      ? (node.gapMinutes / 1440 | number: '1.0-1') + 'd gap'
+                      : (node.gapMinutes / 60  | number: '1.0-1') + 'h gap' }}
+                  </div>
+                }
+              </div>
+            }
+            <div class="node" (click)="openDetail(node.commit.sha)">
+              <div class="node-dot"
+                   [class.pushed]="node.commit.is_pushed"
+                   [class.local]="!node.commit.is_pushed"></div>
+              <div class="node-label">
+                <code class="hash-chip">{{ node.commit.short_sha }}</code>
+                <span class="node-msg">{{ node.commit.title }}</span>
+                <span class="node-time mono">{{ node.commit.author_time | relativeTime }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Stats panel -->
+        <div class="stats-panel card">
+          <div class="stat-group">
+            <span class="stat-label">Total Commits</span>
+            <span class="stat-val">{{ totalCommits() }}</span>
+          </div>
+          <div class="stat-group">
+            <span class="stat-label">Newest</span>
+            <span class="stat-val mono small">{{ newest() | formatDate: 'datetime' }}</span>
+          </div>
+          <div class="stat-group">
+            <span class="stat-label">Oldest</span>
+            <span class="stat-val mono small">{{ oldest() | formatDate: 'datetime' }}</span>
+          </div>
+          <div class="stat-group">
+            <span class="stat-label">Span</span>
+            <span class="stat-val">
+              @if ((newest() - oldest()) < 3600) {
+                {{ ((newest() - oldest()) / 60 | number: '1.0-0') }} min
+              } @else if ((newest() - oldest()) < 86400) {
+                {{ ((newest() - oldest()) / 3600 | number: '1.1-1') }} hrs
+              } @else {
+                {{ ((newest() - oldest()) / 86400 | number: '1.1-1') }} days
+              }
+            </span>
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+
+</div>
