@@ -14,6 +14,17 @@ interface CommitDateEdit {
   changed: boolean;
 }
 
+interface TimelineItem {
+  sha: string;
+  status: 'local' | 'unpushed' | 'pushed';
+  origPct: number;
+  newPct: number;
+  lineLeft: number;
+  lineWidth: number;
+  changed: boolean;
+  active: boolean;
+}
+
 @Component({
   selector: 'app-date-editor',
   standalone: true,
@@ -39,6 +50,46 @@ export class DateEditorComponent implements OnInit {
 
   protected dateInput = signal('');
   protected timeInput = signal('');
+
+  protected utcPreview = computed(() => {
+    const row = this.activeRow();
+    if (!row) return '';
+    return new Date(row.newAuthorTime * 1000).toISOString()
+      .replace('T', ' ').slice(0, 19) + ' UTC';
+  });
+
+  protected timelineItems = computed((): TimelineItem[] => {
+    const rows = this.rows();
+    if (rows.length === 0) return [];
+    const activeIdx = this.activeIdx();
+
+    const times = rows.map(r => r.newAuthorTime);
+    const origTimes = rows.map(r => r.commit.author_time);
+    const allTimes = [...times, ...origTimes];
+    let min = Math.min(...allTimes);
+    let max = Math.max(...allTimes);
+
+    const pct = (t: number) => {
+      if (max === min) return 50;
+      // Commits are newest-first; invert so oldest is left
+      return ((t - min) / (max - min)) * 96 + 2;
+    };
+
+    return rows.map((r, i) => {
+      const op = pct(r.commit.author_time);
+      const np = pct(r.newAuthorTime);
+      return {
+        sha: r.commit.sha,
+        status: commitStatus(r.commit),
+        origPct: op,
+        newPct: np,
+        lineLeft: Math.min(op, np),
+        lineWidth: Math.abs(np - op),
+        changed: r.changed,
+        active: i === activeIdx,
+      };
+    });
+  });
 
   ngOnInit(): void {
     const selected = this.repo.selectedList();

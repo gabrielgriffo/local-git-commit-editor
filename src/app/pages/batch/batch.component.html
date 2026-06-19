@@ -5,10 +5,6 @@
     <span class="sel-badge">{{ selectedCount() }} selected</span>
     <div class="header-spacer"></div>
     @if (hasPreview()) {
-      <div class="delta-display">
-        <span>Shift</span>
-        <code class="delta-val">{{ formatDelta(pendingDelta()) }}</code>
-      </div>
       <button class="btn btn-ghost btn-sm" (click)="clearPreview()">Reset</button>
       <button class="btn btn-primary btn-sm" (click)="showConfirm.set(true)">
         Apply to {{ selectedCount() }} commits
@@ -19,66 +15,6 @@
   <div class="page-content">
     <div class="batch-layout">
 
-      <!-- ── Quick adjust panel ──────────────────────────────────── -->
-      <div class="adjust-sidebar card">
-        <div class="panel-title">Quick Adjust</div>
-
-        <div class="adjust-section">
-          <span class="adj-label">Hours</span>
-          <div class="adj-grid">
-            @for (v of [-1,-2,-5,1,2,5]; track v) {
-              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
-                      (click)="addDelta(v * 3600)">
-                {{ v > 0 ? '+' : '' }}{{ v }}h
-              </button>
-            }
-          </div>
-        </div>
-
-        <div class="adjust-section">
-          <span class="adj-label">Days</span>
-          <div class="adj-grid">
-            @for (v of [-1,-2,-5,1,2,5]; track v) {
-              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
-                      (click)="addDelta(v * 86400)">
-                {{ v > 0 ? '+' : '' }}{{ v }}d
-              </button>
-            }
-          </div>
-        </div>
-
-        <div class="adjust-section">
-          <span class="adj-label">Weeks</span>
-          <div class="adj-grid">
-            @for (v of [-1,1]; track v) {
-              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
-                      (click)="addDelta(v * 7 * 86400)">
-                {{ v > 0 ? '+' : '' }}{{ v }}w
-              </button>
-            }
-          </div>
-        </div>
-
-        <div class="adjust-section">
-          <span class="adj-label">Months</span>
-          <div class="adj-grid">
-            @for (v of [-1,1]; track v) {
-              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
-                      (click)="addDelta(v * 30 * 86400)">
-                {{ v > 0 ? '+' : '' }}{{ v }}mo
-              </button>
-            }
-          </div>
-        </div>
-
-        @if (pendingDelta() !== 0) {
-          <div class="total-delta">
-            <span class="total-label">Total shift</span>
-            <code class="total-val">{{ formatDelta(pendingDelta()) }}</code>
-          </div>
-        }
-      </div>
-
       <!-- ── Commit table ────────────────────────────────────────── -->
       <div class="commit-table card">
         <div class="table-header">
@@ -87,10 +23,11 @@
               [checked]="allSelected()"
               (change)="selectAll()" />
           </label>
-          <span class="col-hash">SHA</span>
+          <span class="col-hash">Hash</span>
           <span class="col-msg">Message</span>
-          <span class="col-time">Original Time</span>
-          <span class="col-new">New Time</span>
+          <span class="col-author">Author</span>
+          <span class="col-time">Time</span>
+          <span class="col-status">Status</span>
         </div>
         <div class="table-body">
           @for (row of rows(); track row.commit.sha) {
@@ -105,23 +42,88 @@
                   (change)="toggleRow(row.commit.sha)" />
               </label>
               <code class="col-hash hash-chip">{{ row.commit.short_sha }}</code>
-              <span class="col-msg msg-text">
-                {{ row.commit.title }}
-                @if (row.commit.is_pushed) {
-                  <span class="pushed-tag">pushed</span>
-                }
-              </span>
+              <span class="col-msg msg-text">{{ row.commit.title }}</span>
+              <span class="col-author author-text">{{ row.commit.author_name }}</span>
               <span class="col-time mono time-text">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
-              <span class="col-new mono">
-                @if (row.previewTime !== null) {
-                  <span class="new-time">{{ row.previewTime | formatDate: 'datetime' }}</span>
+              <span class="col-status">
+                @if (row.commit.is_pushed) {
+                  <span class="status-badge status-pushed">PUSHED</span>
                 } @else {
-                  <span class="no-change">—</span>
+                  <span class="status-badge status-local">LOCAL</span>
                 }
               </span>
             </div>
           }
         </div>
+      </div>
+
+      <!-- ── Batch shift panel ──────────────────────────────────── -->
+      <div class="batch-panel card">
+        <div class="panel-header">
+          <span class="panel-title">
+            @if (selectedCount() > 0) {
+              Shift {{ selectedCount() }} commit{{ selectedCount() !== 1 ? 's' : '' }}
+            } @else {
+              Batch Shift
+            }
+          </span>
+          @if (pendingDelta() !== 0) {
+            <code class="total-badge">{{ formatDelta(pendingDelta()) }}</code>
+          }
+        </div>
+
+        <div class="adjust-section">
+          <span class="adj-label">Hours</span>
+          <div class="adj-row">
+            @for (v of [-5,-2,-1,1,2,5]; track v) {
+              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
+                      (click)="addDelta(v * 3600)">
+                {{ v > 0 ? '+' : '' }}{{ v }}h
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="adjust-section">
+          <span class="adj-label">Days</span>
+          <div class="adj-row">
+            @for (v of [-5,-2,-1,1,2,5]; track v) {
+              <button class="adj-pill" [class.neg]="v < 0" [class.pos]="v > 0"
+                      (click)="addDelta(v * 86400)">
+                {{ v > 0 ? '+' : '' }}{{ v }}d
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="adjust-section">
+          <span class="adj-label">Weeks &amp; Months</span>
+          <div class="adj-row">
+            <button class="adj-pill neg" (click)="addDelta(-7 * 86400)">-1w</button>
+            <button class="adj-pill pos" (click)="addDelta(7 * 86400)">+1w</button>
+            <button class="adj-pill neg" (click)="addDelta(-30 * 86400)">-1mo</button>
+            <button class="adj-pill pos" (click)="addDelta(30 * 86400)">+1mo</button>
+          </div>
+        </div>
+
+        @if (hasPreview()) {
+          <div class="preview-section">
+            <div class="preview-section-title">Preview Changes</div>
+            @for (row of selectedRows(); track row.commit.sha) {
+              <div class="preview-row">
+                <div class="preview-row-top">
+                  <code class="hash-chip">{{ row.commit.short_sha }}</code>
+                  <span class="preview-msg">{{ row.commit.title }}</span>
+                </div>
+                <div class="preview-times mono">
+                  <span class="orig-time">{{ row.commit.author_time | formatDate: 'time' }}</span>
+                  <span class="preview-arrow">→</span>
+                  <span class="new-time-val">{{ row.previewTime! | formatDate: 'time' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
 
     </div>
@@ -138,10 +140,10 @@
         </div>
         <div class="dialog-body">
           @for (row of selectedRows(); track row.commit.sha) {
-            <div class="preview-item">
+            <div class="dialog-preview-item">
               <code class="hash-chip">{{ row.commit.short_sha }}</code>
-              <span class="preview-msg">{{ row.commit.title }}</span>
-              <div class="preview-times mono">
+              <span class="dialog-preview-msg">{{ row.commit.title }}</span>
+              <div class="dialog-preview-times mono">
                 <span class="old">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
                 <span>→</span>
                 <span class="new">{{ row.previewTime! | formatDate: 'datetime' }}</span>

@@ -20,9 +20,8 @@
 
   /* Accent & semantic */
   --accent:     #ff3838;
-  // --accent:     #4a90e2;
-  --accent-lo:  rgba(74, 144, 226, 0.12);
-  --accent-md:  rgba(74, 144, 226, 0.20);
+  --accent-lo:  rgba(255, 56, 56, 0.10);
+  --accent-md:  rgba(255, 56, 56, 0.18);
   --success:    #56d364;
   --success-lo: rgba(86, 211, 100, 0.10);
   --warning:    #d29922;
@@ -229,8 +228,8 @@ a {
   &-primary {
     background: var(--accent);
     color: #fff;
-    &:hover:not(:disabled) { background: #3a80d2; }
-    &:active:not(:disabled) { background: #2a70c2; }
+    &:hover:not(:disabled) { background: #e02020; }
+    &:active:not(:disabled) { background: #c41818; }
   }
 
   &-secondary {
@@ -302,7 +301,7 @@ a {
   &-unpushed {
     background: var(--accent-lo);
     color: var(--accent);
-    border: 1px solid rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(255, 56, 56, 0.2);
   }
 
   &-pushed {

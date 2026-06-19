@@ -43,7 +43,7 @@
         }
       </div>
 
-      <!-- ── Editor panel ──────────────────────────────────────── -->
+      <!-- ── Editor panel ───────────────────────────────────────── -->
       <div class="edit-panel">
 
         @if (activeIsPushed()) {
@@ -77,11 +77,17 @@
                 (change)="applyInputToRow()" />
             </div>
           </div>
-          <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-top:var(--sp-3)"
-                  [disabled]="activeIsPushed()"
-                  (click)="applyInputToRow()">
-            Apply to Selected Commit
-          </button>
+          <div class="utc-preview">
+            <span class="utc-label">UTC</span>
+            <code class="utc-value mono">{{ utcPreview() }}</code>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-secondary"
+                    [disabled]="activeIsPushed()"
+                    (click)="applyInputToRow()">
+              Apply to Selected Commit
+            </button>
+          </div>
         </div>
 
         <!-- Quick adjust -->
@@ -123,6 +129,36 @@
         </div>
 
       </div>
+      <!-- ── Timeline strip ─────────────────────────────────────── -->
+      @if (timelineItems().length > 0) {
+        <div class="timeline-strip">
+          <div class="tl-rail">
+            @for (item of timelineItems(); track item.sha) {
+              <!-- Ghost dot at original position for changed commits -->
+              @if (item.changed) {
+                <div class="tl-dot tl-dot--ghost"
+                     [style.left]="item.origPct + '%'">
+                </div>
+              }
+              <!-- Current/new position dot -->
+              <div class="tl-dot"
+                   [class]="'tl-dot--' + item.status"
+                   [class.tl-dot--active]="item.active"
+                   [class.tl-dot--changed]="item.changed"
+                   [style.left]="item.newPct + '%'">
+              </div>
+              <!-- Arrow line from original to new for changed commits -->
+              @if (item.changed) {
+                <div class="tl-move-line"
+                     [style.left]="item.lineLeft + '%'"
+                     [style.width]="item.lineWidth + '%'">
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+
     </div>
   </div>
 
