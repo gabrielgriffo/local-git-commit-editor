@@ -191,3 +191,60 @@
   animation: spin 0.6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Date editor */
+.date-display {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+}
+
+.date-editor {
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.dt-inputs {
+  display: flex;
+  gap: var(--sp-3);
+}
+
+.dt-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.dt-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.utc-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--mono-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.utc-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.utc-value {
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}

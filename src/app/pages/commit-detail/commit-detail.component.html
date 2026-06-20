@@ -107,6 +107,95 @@
           }
         </section>
 
+        <!-- ── Date editor ──────────────────────────────────────── -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Author Date</h2>
+            @if (!isPushed() && !editingDate()) {
+              <button class="btn btn-secondary btn-sm" (click)="startEditingDate()">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <rect x="1" y="2" width="9" height="8" rx="1.2" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="1" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="3.5" y1="1" x2="3.5" y2="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  <line x1="7.5" y1="1" x2="7.5" y2="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                Edit
+              </button>
+            }
+          </div>
+
+          @if (editingDate()) {
+            <div class="date-editor anim-fade-in">
+              <div class="dt-inputs">
+                <div class="dt-field">
+                  <label class="dt-label">Date</label>
+                  <input class="input mono" type="date"
+                    [value]="dateInput()"
+                    (input)="dateInput.set($any($event.target).value)"
+                    (change)="applyDateInputToSignal()" />
+                </div>
+                <div class="dt-field">
+                  <label class="dt-label">Time</label>
+                  <input class="input mono" type="time"
+                    [value]="timeInput()"
+                    (input)="timeInput.set($any($event.target).value)"
+                    (change)="applyDateInputToSignal()" />
+                </div>
+              </div>
+              <div class="utc-preview">
+                <span class="utc-label">UTC</span>
+                <code class="utc-value mono">{{ utcPreview() }}</code>
+              </div>
+
+              @if (!confirmDate()) {
+                <div class="editor-actions">
+                  <button class="btn btn-ghost btn-sm" (click)="cancelDateEdit()">Cancel</button>
+                  <button class="btn btn-primary btn-sm" (click)="requestDateConfirm()" [disabled]="!isDateDirty()">
+                    Preview Changes
+                  </button>
+                </div>
+              } @else {
+                <div class="confirm-panel anim-scale-in">
+                  <div class="confirm-header">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 1L1.5 12.5h11L7 1z" stroke="var(--warning)" stroke-width="1.3"/>
+                      <line x1="7" y1="5.5" x2="7" y2="8.5" stroke="var(--warning)" stroke-width="1.3" stroke-linecap="round"/>
+                      <circle cx="7" cy="10.5" r="0.6" fill="var(--warning)"/>
+                    </svg>
+                    <span>This rewrites commit history. All descendants will receive new SHAs.</span>
+                  </div>
+                  <div class="diff-block">
+                    <div class="diff-side">
+                      <span class="diff-label removed">Before</span>
+                      <pre class="diff-text">{{ c.author_time | formatDate: 'datetime' }}</pre>
+                    </div>
+                    <div class="diff-arrow">→</div>
+                    <div class="diff-side">
+                      <span class="diff-label added">After</span>
+                      <pre class="diff-text">{{ newAuthorTime() | formatDate: 'datetime' }}</pre>
+                    </div>
+                  </div>
+                  <div class="confirm-actions">
+                    <button class="btn btn-ghost btn-sm" (click)="confirmDate.set(false)">Back</button>
+                    <button class="btn btn-primary btn-sm" (click)="applyDateEdit()" [disabled]="isSaving()">
+                      @if (isSaving()) { <span class="spinner-sm"></span> Applying… }
+                      @else { Apply Changes }
+                    </button>
+                  </div>
+                  @if (error()) {
+                    <p class="error-inline">{{ error() }}</p>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="date-display">
+              <span class="meta-val mono">{{ c.author_time | formatDate: 'datetime' }}</span>
+              <span class="meta-rel">({{ c.author_time | relativeTime }})</span>
+            </div>
+          }
+        </section>
+
         <!-- ── Metadata ──────────────────────────────────────────── -->
         <section class="section">
           <div class="section-header">

@@ -17,6 +17,9 @@
 
       <!-- ── Commit table ────────────────────────────────────────── -->
       <div class="commit-table card">
+        <div class="panel-header">
+          <span class="panel-title">Commits</span>
+        </div>
         <div class="table-header">
           <label class="checkbox-cell">
             <input type="checkbox"
@@ -68,7 +71,11 @@
             }
           </span>
           @if (pendingDelta() !== 0) {
-            <code class="total-badge">{{ formatDelta(pendingDelta()) }}</code>
+            <code class="total-badge"
+                   [class.total-badge--pos]="pendingDelta() > 0"
+                   [class.total-badge--neg]="pendingDelta() < 0">
+              {{ formatDelta(pendingDelta()) }}
+            </code>
           }
         </div>
 
@@ -116,9 +123,13 @@
                   <span class="preview-msg">{{ row.commit.title }}</span>
                 </div>
                 <div class="preview-times mono">
-                  <span class="orig-time">{{ row.commit.author_time | formatDate: 'time' }}</span>
+                  <span class="orig-time">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
                   <span class="preview-arrow">→</span>
-                  <span class="new-time-val">{{ row.previewTime! | formatDate: 'time' }}</span>
+                  <span class="new-time-val"
+                        [class.time-pos]="pendingDelta() > 0"
+                        [class.time-neg]="pendingDelta() < 0">
+                    {{ row.previewTime! | formatDate: 'datetime' }}
+                  </span>
                 </div>
               </div>
             }
@@ -135,7 +146,9 @@
       <div class="confirm-dialog anim-scale-in" (click)="$event.stopPropagation()">
         <div class="dialog-header">
           <h2>Confirm Batch Shift</h2>
-          <p>{{ selectedCount() }} commit(s) will be shifted by <strong>{{ formatDelta(pendingDelta()) }}</strong>.</p>
+          <p>{{ selectedCount() }} commit(s) will be shifted by
+            <strong [class.delta-pos]="pendingDelta() > 0" [class.delta-neg]="pendingDelta() < 0">{{ formatDelta(pendingDelta()) }}</strong>.
+          </p>
           <p class="warn">This rewrites history — all shifted commits and their descendants will receive new SHAs.</p>
         </div>
         <div class="dialog-body">
@@ -146,7 +159,11 @@
               <div class="dialog-preview-times mono">
                 <span class="old">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
                 <span>→</span>
-                <span class="new">{{ row.previewTime! | formatDate: 'datetime' }}</span>
+                <span class="new"
+                      [class.time-pos]="pendingDelta() > 0"
+                      [class.time-neg]="pendingDelta() < 0">
+                  {{ row.previewTime! | formatDate: 'datetime' }}
+                </span>
               </div>
             </div>
           }

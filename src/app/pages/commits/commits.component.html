@@ -71,7 +71,11 @@
     <div class="content-grid">
 
       <!-- Commit list -->
-      <div class="list-wrap">
+      <div class="list-wrap card">
+        <div class="panel-header">
+          <span class="panel-title">Commits</span>
+        </div>
+        <div class="list-body">
         @if (isLoading()) {
           <div class="loading-state">
             @for (i of [1,2,3,4,5,6,7,8]; track i) {
@@ -139,45 +143,50 @@
             }
           </div>
         }
+        </div>
       </div>
 
       <!-- Stats panel -->
       <div class="stats-panel card">
-        <p class="stats-title">Repository</p>
-
-        <div class="stat-row">
-          <span class="stat-label">Total</span>
-          <span class="stat-val">{{ totalCount() }}</span>
+        <div class="panel-header">
+          <span class="panel-title">Repository</span>
         </div>
 
-        <div class="stat-divider"></div>
-
-        <div class="stat-row">
-          <span class="stat-label">Local only</span>
-          <span class="stat-val local">{{ localCount() }}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Unpushed</span>
-          <span class="stat-val unpushed">{{ unpushedCount() }}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Pushed</span>
-          <span class="stat-val muted">{{ pushedCount() }}</span>
+        <div class="stat-section">
+          <div class="stat-row">
+            <span class="stat-label">Total</span>
+            <span class="stat-val">{{ totalCount() }}</span>
+          </div>
         </div>
 
-        <div class="stat-divider"></div>
+        <div class="stat-section">
+          <div class="stat-row">
+            <span class="stat-label">Local only</span>
+            <span class="stat-val local">{{ localCount() }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Unpushed</span>
+            <span class="stat-val unpushed">{{ unpushedCount() }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Pushed</span>
+            <span class="stat-val muted">{{ pushedCount() }}</span>
+          </div>
+        </div>
 
-        <div class="stat-row">
-          <span class="stat-label">Span</span>
-          <span class="stat-val">{{ spanLabel() }}</span>
-        </div>
-        <div class="stat-col">
-          <span class="stat-label">Newest</span>
-          <span class="stat-date mono">{{ newestLabel() }}</span>
-        </div>
-        <div class="stat-col">
-          <span class="stat-label">Oldest</span>
-          <span class="stat-date mono">{{ oldestLabel() }}</span>
+        <div class="stat-section">
+          <div class="stat-row">
+            <span class="stat-label">Span</span>
+            <span class="stat-val">{{ spanLabel() }}</span>
+          </div>
+          <div class="stat-col">
+            <span class="stat-label">Newest</span>
+            <span class="stat-date mono">{{ newestLabel() }}</span>
+          </div>
+          <div class="stat-col">
+            <span class="stat-label">Oldest</span>
+            <span class="stat-date mono">{{ oldestLabel() }}</span>
+          </div>
         </div>
       </div>
 
