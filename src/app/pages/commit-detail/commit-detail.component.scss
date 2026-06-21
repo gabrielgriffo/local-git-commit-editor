@@ -115,6 +115,9 @@
   &.added   { color: var(--success); }
 }
 
+.time-pos { color: var(--success); }
+.time-neg { color: var(--danger); }
+
 .diff-text {
   font-family: var(--font-mono);
   font-size: var(--text-xs);

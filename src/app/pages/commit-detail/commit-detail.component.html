@@ -171,8 +171,12 @@
                     </div>
                     <div class="diff-arrow">→</div>
                     <div class="diff-side">
-                      <span class="diff-label added">After</span>
-                      <pre class="diff-text">{{ newAuthorTime() | formatDate: 'datetime' }}</pre>
+                      <span class="diff-label"
+                            [class.added]="newAuthorTime() > c.author_time"
+                            [class.removed]="newAuthorTime() < c.author_time">After</span>
+                      <pre class="diff-text"
+                           [class.time-pos]="newAuthorTime() > c.author_time"
+                           [class.time-neg]="newAuthorTime() < c.author_time">{{ newAuthorTime() | formatDate: 'datetime' }}</pre>
                     </div>
                   </div>
                   <div class="confirm-actions">
