@@ -8,11 +8,12 @@ import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { RelativeTimePipe } from '../../core/pipes/relative-time.pipe';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-commit-detail',
   standalone: true,
-  imports: [FormsModule, TitleCasePipe, RelativeTimePipe, FormatDatePipe],
+  imports: [FormsModule, TitleCasePipe, RelativeTimePipe, FormatDatePipe, IconComponent],
   templateUrl: './commit-detail.component.html',
   styleUrl: './commit-detail.component.scss',
   host: { '(document:keydown.escape)': 'onEscape()' },

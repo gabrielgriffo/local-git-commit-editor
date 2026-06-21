@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RepositoryService } from '../../core/services/repository.service';
 import { GitService } from '../../core/services/git.service';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, IconComponent],
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.scss',
 })

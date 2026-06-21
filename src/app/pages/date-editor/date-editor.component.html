@@ -62,11 +62,7 @@
 
         @if (activeIsPushed()) {
           <div class="pushed-notice">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M6 1L1 11h10L6 1z" stroke="currentColor" stroke-width="1.2"/>
-              <line x1="6" y1="5" x2="6" y2="7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-              <circle cx="6" cy="9.5" r="0.5" fill="currentColor"/>
-            </svg>
+            <app-icon name="alert-triangle" />
             <span>Commit pushed — date is read-only</span>
           </div>
         }
@@ -95,16 +91,11 @@
             <span class="utc-label">UTC</span>
             <code class="utc-value mono">{{ utcPreview() }}</code>
           </div>
-          <div class="apply-row">
-            @if (activeRow()?.changed) {
+          @if (activeRow().changed) {
+            <div class="apply-row">
               <button class="btn btn-ghost btn-sm" (click)="resetRow(activeIdx())">Reset</button>
-            }
-            <button class="btn btn-secondary btn-sm"
-                    [disabled]="activeIsPushed()"
-                    (click)="applyInputToRow()">
-              Apply to Selected
-            </button>
-          </div>
+            </div>
+          }
         </div>
 
         <!-- Hours -->

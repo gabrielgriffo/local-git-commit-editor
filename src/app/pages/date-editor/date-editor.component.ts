@@ -6,6 +6,7 @@ import { DateEditOperation } from '../../core/models/edit-operation.model';
 import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 interface CommitDateEdit {
   commit: CommitInfo;
@@ -28,7 +29,7 @@ interface TimelineItem {
 @Component({
   selector: 'app-date-editor',
   standalone: true,
-  imports: [FormsModule, FormatDatePipe],
+  imports: [FormsModule, FormatDatePipe, IconComponent],
   templateUrl: './date-editor.component.html',
   styleUrl: './date-editor.component.scss',
 })

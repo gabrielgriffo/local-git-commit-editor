@@ -6,11 +6,12 @@ import { CommitInfo, commitStatus } from '../../core/models/commit.model';
 import { RepositoryService } from '../../core/services/repository.service';
 import { RelativeTimePipe } from '../../core/pipes/relative-time.pipe';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-commits',
   standalone: true,
-  imports: [FormsModule, TitleCasePipe, RelativeTimePipe, FormatDatePipe],
+  imports: [FormsModule, TitleCasePipe, RelativeTimePipe, FormatDatePipe, IconComponent],
   templateUrl: './commits.component.html',
   styleUrl: './commits.component.scss',
   host: {

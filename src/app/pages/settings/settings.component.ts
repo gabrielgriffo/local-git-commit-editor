@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [],
+  imports: [IconComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
 })

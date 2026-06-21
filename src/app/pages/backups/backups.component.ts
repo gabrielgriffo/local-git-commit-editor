@@ -5,11 +5,12 @@ import { BackupService } from '../../core/services/backup.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
 import { RelativeTimePipe } from '../../core/pipes/relative-time.pipe';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 @Component({
   selector: 'app-backups',
   standalone: true,
-  imports: [FormatDatePipe, RelativeTimePipe],
+  imports: [FormatDatePipe, RelativeTimePipe, IconComponent],
   templateUrl: './backups.component.html',
   styleUrl: './backups.component.scss',
 })
