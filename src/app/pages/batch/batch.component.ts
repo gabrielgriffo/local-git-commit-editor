@@ -5,6 +5,7 @@ import { CommitInfo } from '../../core/models/commit.model';
 import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
+import { IconComponent } from '../../shared/icon/icon.component';
 
 interface BatchRow {
   commit: CommitInfo;
@@ -15,7 +16,7 @@ interface BatchRow {
 @Component({
   selector: 'app-batch',
   standalone: true,
-  imports: [FormsModule, FormatDatePipe],
+  imports: [FormsModule, FormatDatePipe, IconComponent],
   templateUrl: './batch.component.html',
   styleUrl: './batch.component.scss',
   host: {
@@ -95,6 +96,11 @@ export class BatchComponent implements OnInit {
     if (abs < 86400) return `${sign}${Math.round(abs / 3600)}h`;
     if (abs < 86400 * 7) return `${sign}${Math.round(abs / 86400)}d`;
     return `${sign}${Math.round(abs / 86400 / 7)}w`;
+  }
+
+  protected async refresh(): Promise<void> {
+    await this.repo.loadCommits();
+    this.ngOnInit();
   }
 
   protected async apply(): Promise<void> {

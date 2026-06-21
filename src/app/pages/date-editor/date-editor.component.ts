@@ -200,6 +200,11 @@ export class DateEditorComponent implements OnInit {
     return `${sign}${Math.round(abs / 86400)}d`;
   }
 
+  protected async refresh(): Promise<void> {
+    await this.repo.loadCommits();
+    this.ngOnInit();
+  }
+
   private toDateString(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
