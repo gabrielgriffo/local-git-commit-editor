@@ -76,8 +76,12 @@ export class RepositoryService {
     if (!path) return;
     this.isLoading.set(true);
     try {
-      const list = await this.git.getCommits(path, limit, offset);
+      const [list, info] = await Promise.all([
+        this.git.getCommits(path, limit, offset),
+        this.git.openRepository(path),
+      ]);
       this.commits.set(list);
+      this.repoInfo.set(info);
     } catch (e: unknown) {
       this.error.set(e instanceof Error ? e.message : String(e));
     } finally {

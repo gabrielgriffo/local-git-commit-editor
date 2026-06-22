@@ -2,22 +2,27 @@
 
 .settings-layout {
   max-width: 600px;
-  padding: var(--sp-6);
+  padding: var(--sp-4);
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
 }
 
-.settings-section { padding: 0; }
+.settings-section {
+  padding: 0;
+  overflow: hidden;
+}
 
 .section-title {
   font-size: var(--text-xs);
   font-weight: 600;
   color: var(--ink-3);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.09em;
   padding: var(--sp-3) var(--sp-4);
   border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 
 .setting-row {
@@ -27,12 +32,15 @@
   gap: var(--sp-4);
   padding: var(--sp-4);
   border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+
+  &:hover { background: rgba(255, 255, 255, 0.02); }
   &:last-child { border-bottom: none; }
 }
 
 .setting-info { flex: 1; }
 .setting-name { font-size: var(--text-sm); font-weight: 500; color: var(--ink-1); margin-bottom: 3px; }
-.setting-desc { font-size: var(--text-xs); color: var(--ink-3); }
+.setting-desc { font-size: var(--text-xs); color: var(--ink-3); line-height: 1.5; }
 
 /* Toggle */
 .toggle {
@@ -52,7 +60,7 @@
   background: var(--surface-3);
   border: 1px solid var(--border-md);
   border-radius: 10px;
-  transition: background var(--t-fast);
+  transition: background var(--t-fast), border-color var(--t-fast);
   position: relative;
 
   &::after {
@@ -78,11 +86,15 @@
 .safety-note {
   display: flex;
   align-items: flex-start;
-  gap: var(--sp-4);
+  gap: var(--sp-3);
   padding: var(--sp-4);
   font-size: var(--text-sm);
   color: var(--ink-2);
   line-height: 1.6;
+  background: var(--success-lo);
+  border-top: 1px solid rgba(86, 211, 100, 0.12);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+
   svg { flex-shrink: 0; margin-top: 2px; }
-  strong { color: var(--success); }
+  strong { color: var(--success); font-weight: 500; }
 }

@@ -3,7 +3,7 @@
 
 .backups-layout {
   max-width: 680px;
-  padding: var(--sp-5) var(--sp-6);
+  padding: var(--sp-4);
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
@@ -30,12 +30,17 @@
   color: var(--danger);
 }
 
-.loading-text { font-size: var(--text-sm); color: var(--ink-3); padding: var(--sp-4) 0; }
+.loading-text {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  padding: var(--sp-8) 0;
+  text-align: center;
+}
 
 .backup-list {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-2);
 }
 
 .backup-card {
@@ -43,17 +48,28 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-4);
-  padding: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  transition: background var(--t-fast), border-color var(--t-fast);
+
+  &:hover {
+    background: var(--surface-2);
+    border-color: var(--border-md);
+  }
 }
 
-.backup-info { flex: 1; min-width: 0; }
+.backup-info { flex: 1; min-width: 0; padding-left: var(--sp-1); }
+
 .backup-desc {
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink-1);
-  margin-bottom: 4px;
+  margin-bottom: var(--sp-1);
   font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .backup-meta {
   display: flex;
   align-items: center;
@@ -62,7 +78,8 @@
   color: var(--ink-3);
   flex-wrap: wrap;
 }
-.date { color: var(--ink-3); }
+
+.date { color: var(--ink-4); }
 
 .backup-actions {
   display: flex;
@@ -73,15 +90,16 @@
 .safety-note {
   display: flex;
   align-items: flex-start;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
-  background: var(--surface-1);
+  background: rgba(255, 255, 255, 0.015);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
   color: var(--ink-3);
   line-height: 1.6;
-  svg { flex-shrink: 0; margin-top: 1px; }
+
+  svg { flex-shrink: 0; margin-top: 1px; opacity: 0.5; }
   code { font-family: var(--font-mono); color: var(--hash); }
 }
 
