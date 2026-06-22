@@ -343,3 +343,24 @@ a {
 .anim-slide-up      { animation: slide-up 0.2s ease-out; }
 .anim-slide-in-right { animation: slide-in-right 0.2s ease-out; }
 .anim-scale-in      { animation: scale-in 0.15s ease-out; }
+
+/* ─── Status bar ─────────────────────────────────────────────────────── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-6);
+  height: 28px;
+  min-height: 28px;
+  border-top: 1px solid var(--border);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.accent { color: var(--accent); }
+
+.status-hint {
+  margin-left: auto;
+  color: var(--ink-4);
+}

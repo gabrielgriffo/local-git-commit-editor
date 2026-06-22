@@ -2,10 +2,12 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { CommitInfo } from '../models/commit.model';
 import { RepositoryInfo } from '../models/repository.model';
 import { GitService } from './git.service';
+import { SettingsService } from './settings.service';
 
 @Injectable({ providedIn: 'root' })
 export class RepositoryService {
-  private git = inject(GitService);
+  private git      = inject(GitService);
+  private settings = inject(SettingsService);
 
   readonly repoPath   = signal<string | null>(null);
   readonly repoInfo   = signal<RepositoryInfo | null>(null);
@@ -68,8 +70,9 @@ export class RepositoryService {
     }
   }
 
-  async loadCommits(limit = 200, offset = 0): Promise<void> {
-    const path = this.repoPath();
+  async loadCommits(offset = 0): Promise<void> {
+    const path  = this.repoPath();
+    const limit = this.settings.commitLimit();
     if (!path) return;
     this.isLoading.set(true);
     try {

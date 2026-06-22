@@ -173,6 +173,15 @@
     </div>
   </div>
 
+  <!-- ── Status bar ────────────────────────────────────────────────── -->
+  <div class="status-bar">
+    <span>{{ rows().length }} commits</span>
+    @if (changedCount() > 0) {
+      <span class="accent">· {{ changedCount() }} changed</span>
+    }
+    <span class="status-hint">Click a commit to edit</span>
+  </div>
+
   <!-- ── Confirmation overlay ──────────────────────────────────────── -->
   @if (showConfirm()) {
     <div class="overlay anim-fade-in" (click)="showConfirm.set(false)">

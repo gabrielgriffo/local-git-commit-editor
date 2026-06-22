@@ -14,7 +14,7 @@
           </div>
           <select class="input" style="width:100px"
             [value]="commitLimit()"
-            (change)="commitLimit.set(+$any($event.target).value)">
+            (change)="onCommitLimitChange(+$any($event.target).value)">
             <option value="50">50</option>
             <option value="100">100</option>
             <option value="200">200</option>
@@ -30,7 +30,7 @@
           <label class="toggle">
             <input type="checkbox"
               [checked]="confirmEdits()"
-              (change)="confirmEdits.set($any($event.target).checked)" />
+              (change)="settings.setConfirmEdits($any($event.target).checked)" />
             <span class="track"></span>
           </label>
         </div>
@@ -43,7 +43,7 @@
           <label class="toggle">
             <input type="checkbox"
               [checked]="autoBackup()"
-              (change)="autoBackup.set($any($event.target).checked)" />
+              (change)="settings.setAutoBackup($any($event.target).checked)" />
             <span class="track"></span>
           </label>
         </div>

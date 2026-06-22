@@ -94,7 +94,7 @@ export class DateEditorComponent implements OnInit {
 
   ngOnInit(): void {
     const selected = this.repo.selectedList();
-    const source = selected.length > 0 ? selected : this.repo.commits().slice(0, 10);
+    const source = selected.length > 0 ? selected : this.repo.commits();
     this.rows.set(source.map(c => ({
       commit: c,
       newAuthorTime: c.author_time,

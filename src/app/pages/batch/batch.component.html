@@ -144,6 +144,18 @@
     </div>
   </div>
 
+  <!-- ── Status bar ────────────────────────────────────────────────── -->
+  <div class="status-bar">
+    <span>{{ rows().length }} commits</span>
+    @if (selectedCount() > 0) {
+      <span class="accent">· {{ selectedCount() }} selected</span>
+    }
+    @if (pendingDelta() !== 0) {
+      <span class="accent">· {{ formatDelta(pendingDelta()) }} pending</span>
+    }
+    <span class="status-hint">Ctrl+A to select all · Esc to clear</span>
+  </div>
+
   <!-- ── Confirmation overlay ──────────────────────────────────────── -->
   @if (showConfirm()) {
     <div class="overlay anim-fade-in" (click)="showConfirm.set(false)">
