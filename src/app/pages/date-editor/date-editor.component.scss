@@ -41,7 +41,7 @@
   transition: background var(--t-fast);
 
   &:hover { background: var(--surface-2); }
-  &.active { background: var(--accent-lo); border-left: 2px solid var(--accent); }
+  &.active { background: var(--surface-3); border-left: 2px solid var(--border-em); }
 
   &.is-pushed {
     opacity: 0.55;
@@ -88,12 +88,12 @@
   &.diff-pos {
     color: var(--success);
     background: var(--success-lo);
-    border: 1px solid rgba(86,211,100,0.2);
+    border: 1px solid rgba(66,168,92,0.2);
   }
   &.diff-neg {
     color: var(--danger);
     background: var(--danger-lo);
-    border: 1px solid rgba(224,82,82,0.2);
+    border: 1px solid rgba(218,64,64,0.2);
   }
 }
 
@@ -124,7 +124,7 @@
   gap: var(--sp-2);
   padding: var(--sp-2) var(--sp-4);
   background: var(--warning-lo);
-  border-bottom: 1px solid rgba(210,153,34,0.2);
+  border-bottom: 1px solid rgba(184,136,50,0.2);
   font-size: var(--text-xs);
   color: var(--warning);
   flex-shrink: 0;
@@ -220,15 +220,15 @@
   &.neg {
     background: var(--danger-lo);
     color: var(--danger);
-    border: 1px solid rgba(224,82,82,0.2);
-    &:hover { background: rgba(224,82,82,0.18); border-color: rgba(224,82,82,0.4); }
+    border: 1px solid rgba(218,64,64,0.2);
+    &:hover { background: rgba(218,64,64,0.18); border-color: rgba(218,64,64,0.4); }
   }
 
   &.pos {
     background: var(--success-lo);
     color: var(--success);
-    border: 1px solid rgba(86,211,100,0.2);
-    &:hover { background: rgba(86,211,100,0.18); border-color: rgba(86,211,100,0.4); }
+    border: 1px solid rgba(66,168,92,0.2);
+    &:hover { background: rgba(66,168,92,0.18); border-color: rgba(66,168,92,0.4); }
   }
 }
 

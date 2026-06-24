@@ -87,12 +87,12 @@
   &.diff-pos {
     color: var(--success);
     background: var(--success-lo);
-    border: 1px solid rgba(86,211,100,0.2);
+    border: 1px solid rgba(66,168,92,0.2);
   }
   &.diff-neg {
     color: var(--danger);
     background: var(--danger-lo);
-    border: 1px solid rgba(224,82,82,0.2);
+    border: 1px solid rgba(218,64,64,0.2);
   }
 }
 

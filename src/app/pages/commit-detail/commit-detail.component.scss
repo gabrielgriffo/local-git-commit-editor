@@ -4,7 +4,7 @@
 .pushed-warning {
   display: flex; align-items: center; gap: 5px;
   font-size: var(--text-xs); color: var(--warning);
-  background: var(--warning-lo); border: 1px solid rgba(210,153,34,0.2);
+  background: var(--warning-lo); border: 1px solid rgba(184,136,50,0.2);
   border-radius: var(--radius-sm); padding: 3px 8px;
 }
 
@@ -85,7 +85,7 @@
   gap: var(--sp-2);
   padding: var(--sp-3) var(--sp-4);
   background: var(--warning-lo);
-  border-bottom: 1px solid rgba(210,153,34,0.2);
+  border-bottom: 1px solid rgba(184,136,50,0.2);
   font-size: var(--text-sm);
   color: var(--warning);
 }

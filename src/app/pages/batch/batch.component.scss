@@ -53,12 +53,14 @@
   align-items: center;
   transition: background var(--t-fast);
 
+  cursor: pointer;
   &:hover { background: var(--surface-1); }
-  &.selected { background: var(--accent-lo); }
+  &.selected { background: var(--surface-3); }
 
   &.is-pushed {
     opacity: 0.45;
-    input[type=checkbox] { cursor: not-allowed; }
+    cursor: default;
+    input[type=checkbox] { cursor: default; }
     &:hover { background: transparent; }
   }
 }
@@ -111,7 +113,7 @@
   &.status-local {
     background: var(--success-lo);
     color: var(--success);
-    border: 1px solid rgba(86,211,100,0.25);
+    border: 1px solid rgba(66,168,92,0.25);
   }
 
   &.status-pushed {
@@ -159,12 +161,12 @@
   &.total-badge--pos {
     color: var(--success);
     background: var(--success-lo);
-    border-color: rgba(86,211,100,0.25);
+    border-color: rgba(66,168,92,0.25);
   }
   &.total-badge--neg {
     color: var(--danger);
     background: var(--danger-lo);
-    border-color: rgba(224,82,82,0.25);
+    border-color: rgba(218,64,64,0.25);
   }
 }
 
@@ -204,15 +206,15 @@
   &.neg {
     background: var(--danger-lo);
     color: var(--danger);
-    border: 1px solid rgba(224,82,82,0.2);
-    &:hover { background: rgba(224,82,82,0.18); border-color: rgba(224,82,82,0.4); }
+    border: 1px solid rgba(218,64,64,0.2);
+    &:hover { background: rgba(218,64,64,0.18); border-color: rgba(218,64,64,0.4); }
   }
 
   &.pos {
     background: var(--success-lo);
     color: var(--success);
-    border: 1px solid rgba(86,211,100,0.2);
-    &:hover { background: rgba(86,211,100,0.18); border-color: rgba(86,211,100,0.4); }
+    border: 1px solid rgba(66,168,92,0.2);
+    &:hover { background: rgba(66,168,92,0.18); border-color: rgba(66,168,92,0.4); }
   }
 }
 

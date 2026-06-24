@@ -41,7 +41,8 @@
             <div class="table-row"
                  [class.selected]="row.selected"
                  [class.preview]="row.previewTime !== null"
-                 [class.is-pushed]="row.commit.is_pushed">
+                 [class.is-pushed]="row.commit.is_pushed"
+                 (click)="toggleRow(row.commit.sha)">
               <label class="checkbox-cell" (click)="$event.stopPropagation()">
                 <input type="checkbox"
                   [checked]="row.selected"

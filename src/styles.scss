@@ -1,10 +1,10 @@
 /* ─── Design Tokens ─────────────────────────────────────────────────── */
 :root {
   /* Canvas & Surfaces */
-  --canvas:    #111214;
-  --surface-1: #18191c;
-  --surface-2: #222326;
-  --surface-3: #2a2b2f;
+--canvas:    #09090b;
+--surface-1: #111113;
+--surface-2: #18181b;
+--surface-3: #27272a;
 
   /* Borders */
   --border:      rgba(255, 255, 255, 0.06);
@@ -13,24 +13,24 @@
   --border-ctrl: rgba(255, 255, 255, 0.13);
 
   /* Text hierarchy */
-  --ink-1: #e6e7e9;
-  --ink-2: #8b8f98;
-  --ink-3: #55585f;
-  --ink-4: #3a3c42;
+  --ink-1: #f0f0f0;
+  --ink-2: #909098;
+  --ink-3: #5a5a62;
+  --ink-4: #3c3c42;
 
   /* Accent & semantic */
-  --accent:     #ff3838;
-  --accent-lo:  rgba(255, 56, 56, 0.10);
-  --accent-md:  rgba(255, 56, 56, 0.18);
-  --success:    #56d364;
-  --success-lo: rgba(86, 211, 100, 0.10);
-  --warning:    #d29922;
-  --warning-lo: rgba(210, 153, 34, 0.10);
-  --danger:     #e05252;
-  --danger-lo:  rgba(224, 82, 82, 0.10);
+  --accent:     #d44040;
+  --accent-lo:  rgba(212, 64, 64, 0.10);
+  --accent-md:  rgba(212, 64, 64, 0.18);
+  --success:    #42a85c;
+  --success-lo: rgba(66, 168, 92, 0.10);
+  --warning:    #b88832;
+  --warning-lo: rgba(184, 136, 50, 0.10);
+  --danger:     #da4040;
+  --danger-lo:  rgba(218, 64, 64, 0.10);
 
   /* Special */
-  --hash:    #79c0ff;
+  --hash:    #5490cc;
   --mono-bg: rgba(255, 255, 255, 0.04);
 
   /* Typography */
@@ -228,8 +228,8 @@ a {
   &-primary {
     background: var(--accent);
     color: #fff;
-    &:hover:not(:disabled) { background: #e02020; }
-    &:active:not(:disabled) { background: #c41818; }
+    &:hover:not(:disabled) { background: #ba3535; }
+    &:active:not(:disabled) { background: #a02a2a; }
   }
 
   &-secondary {
@@ -246,9 +246,9 @@ a {
 
   &-danger {
     background: var(--danger-lo);
-    border: 1px solid rgba(224, 82, 82, 0.3);
+    border: 1px solid rgba(218, 64, 64, 0.3);
     color: var(--danger);
-    &:hover:not(:disabled) { background: rgba(224, 82, 82, 0.18); }
+    &:hover:not(:disabled) { background: rgba(218, 64, 64, 0.18); }
   }
 
   &-sm { height: 26px; padding: 0 var(--sp-2); font-size: var(--text-xs); border-radius: var(--radius-sm); }
@@ -296,13 +296,13 @@ a {
   &-local {
     background: var(--success-lo);
     color: var(--success);
-    border: 1px solid rgba(86, 211, 100, 0.2);
+    border: 1px solid rgba(66, 168, 92, 0.2);
   }
 
   &-unpushed {
-    background: var(--accent-lo);
-    color: var(--accent);
-    border: 1px solid rgba(255, 56, 56, 0.2);
+    background: var(--danger-lo);
+    color: var(--danger);
+    border: 1px solid rgba(218, 64, 64, 0.2);
   }
 
   &-pushed {
