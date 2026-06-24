@@ -158,11 +158,13 @@ export class DateEditorComponent implements OnInit {
     const rows = [...this.rows()];
     const row = rows[idx];
     if (!row || row.commit.is_pushed) return;
+    const newAuthorTime = row.newAuthorTime + deltaSecs;
+    const newCommitterTime = row.newCommitterTime + deltaSecs;
     rows[idx] = {
       ...row,
-      newAuthorTime: row.newAuthorTime + deltaSecs,
-      newCommitterTime: row.newCommitterTime + deltaSecs,
-      changed: true,
+      newAuthorTime,
+      newCommitterTime,
+      changed: newAuthorTime !== row.commit.author_time,
     };
     this.rows.set(rows);
     this.activateRow(idx);
