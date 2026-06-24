@@ -1,0 +1,52 @@
+<div class="overlay anim-fade-in" (click)="cancelled.emit()">
+  <div class="dialog anim-scale-in" (click)="$event.stopPropagation()">
+
+    <div class="dialog-header">
+      <h2>{{ title() }}</h2>
+      <p>{{ subtitle() }}</p>
+      @if (warning()) {
+        <p class="warn">{{ warning() }}</p>
+      }
+    </div>
+
+    <div class="dialog-body">
+      @for (item of items(); track item.sha) {
+        <div class="preview-item">
+          <div class="preview-item-top">
+            <code class="hash-chip">{{ item.sha }}</code>
+            <span class="preview-msg">{{ item.title }}</span>
+          </div>
+          <div class="preview-times mono">
+            <span class="old">{{ item.oldTime | formatDate: 'datetime' }}</span>
+            <span class="arr">→</span>
+            <span class="new"
+                  [class.time-pos]="item.newTime > item.oldTime"
+                  [class.time-neg]="item.newTime < item.oldTime">
+              {{ item.newTime | formatDate: 'datetime' }}
+            </span>
+            @if (timeDiff(item.oldTime, item.newTime); as delta) {
+              <span class="diff-badge"
+                    [class.diff-pos]="item.newTime > item.oldTime"
+                    [class.diff-neg]="item.newTime < item.oldTime">
+                {{ delta }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="error-inline">{{ error() }}</p>
+    }
+
+    <div class="dialog-footer">
+      <button class="btn btn-ghost" (click)="cancelled.emit()">Cancel</button>
+      <button class="btn btn-primary" (click)="confirmed.emit()" [disabled]="isSaving()">
+        @if (isSaving()) { <span class="spinner-sm"></span> Applying… }
+        @else { {{ confirmLabel() }} }
+      </button>
+    </div>
+
+  </div>
+</div>

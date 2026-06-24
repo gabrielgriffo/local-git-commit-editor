@@ -1,12 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { CommitInfo, commitStatus } from '../../core/models/commit.model';
 import { DateEditOperation } from '../../core/models/edit-operation.model';
 import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
 import { IconComponent } from '../../shared/icon/icon.component';
+import { ConfirmDialogComponent, ConfirmDialogItem } from '../../shared/confirm-dialog/confirm-dialog.component';
 
 interface CommitDateEdit {
   commit: CommitInfo;
@@ -29,12 +29,11 @@ interface TimelineItem {
 @Component({
   selector: 'app-date-editor',
   standalone: true,
-  imports: [FormsModule, FormatDatePipe, IconComponent],
+  imports: [FormsModule, FormatDatePipe, IconComponent, ConfirmDialogComponent],
   templateUrl: './date-editor.component.html',
   styleUrl: './date-editor.component.scss',
 })
 export class DateEditorComponent implements OnInit {
-  private router = inject(Router);
   private repo   = inject(RepositoryService);
   private edit   = inject(CommitEditService);
 
@@ -45,6 +44,21 @@ export class DateEditorComponent implements OnInit {
   protected error       = computed(() => this.edit.lastError());
   protected anyChanged   = computed(() => this.rows().some(r => r.changed));
   protected changedCount = computed(() => this.rows().filter(r => r.changed).length);
+
+  protected confirmItems = computed<ConfirmDialogItem[]>(() =>
+    this.rows()
+      .filter(r => r.changed)
+      .map(r => ({
+        sha: r.commit.short_sha,
+        title: r.commit.title,
+        oldTime: r.commit.author_time,
+        newTime: r.newAuthorTime,
+      }))
+  );
+
+  protected confirmSubtitle = computed(() =>
+    `${this.changedCount()} commit(s) will be rewritten.`
+  );
   protected activeRow    = computed(() => this.rows()[this.activeIdx()] ?? null);
   protected activeIsPushed = computed(() => this.activeRow()?.commit.is_pushed ?? false);
   protected commitStatus = commitStatus;
@@ -186,7 +200,7 @@ export class DateEditorComponent implements OnInit {
     try {
       await this.edit.applyAbsoluteDateEdits(ops);
       this.showConfirm.set(false);
-      this.router.navigate(['/repo/commits']);
+      await this.refresh();
     } catch { /* error shown via computed */ }
   }
 

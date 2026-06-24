@@ -132,9 +132,9 @@
         <div class="adjust-section">
           <span class="adj-label">Weeks &amp; Months</span>
           <div class="adj-row">
+            <button class="adj-pill neg" (click)="shiftActive(-30 * 86400)">-1mo</button>
             <button class="adj-pill neg" (click)="shiftActive(-7 * 86400)">-1w</button>
             <button class="adj-pill pos" (click)="shiftActive(+7 * 86400)">+1w</button>
-            <button class="adj-pill neg" (click)="shiftActive(-30 * 86400)">-1mo</button>
             <button class="adj-pill pos" (click)="shiftActive(+30 * 86400)">+1mo</button>
           </div>
         </div>
@@ -184,44 +184,16 @@
 
   <!-- ── Confirmation overlay ──────────────────────────────────────── -->
   @if (showConfirm()) {
-    <div class="overlay anim-fade-in" (click)="showConfirm.set(false)">
-      <div class="confirm-dialog anim-scale-in" (click)="$event.stopPropagation()">
-        <div class="dialog-header">
-          <h2>Confirm Date Changes</h2>
-          <p>{{ changedCount() }} commit(s) will be rewritten.</p>
-        </div>
-        <div class="dialog-body">
-          @for (row of rows(); track row.commit.sha) {
-            @if (row.changed) {
-              <div class="preview-row">
-                <code class="hash-chip">{{ row.commit.short_sha }}</code>
-                <span class="preview-msg">{{ row.commit.title }}</span>
-                <div class="preview-times mono">
-                  <span class="old">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
-                  <span class="arr">→</span>
-                  <span class="new">{{ row.newAuthorTime | formatDate: 'datetime' }}</span>
-                  <span class="diff-badge"
-                        [class.diff-pos]="row.newAuthorTime > row.commit.author_time"
-                        [class.diff-neg]="row.newAuthorTime < row.commit.author_time">
-                    {{ timeDiff(row.commit.author_time, row.newAuthorTime) }}
-                  </span>
-                </div>
-              </div>
-            }
-          }
-        </div>
-        @if (error()) {
-          <p class="error-inline">{{ error() }}</p>
-        }
-        <div class="dialog-footer">
-          <button class="btn btn-ghost" (click)="showConfirm.set(false)">Cancel</button>
-          <button class="btn btn-primary" (click)="apply()" [disabled]="isSaving()">
-            @if (isSaving()) { <span class="spinner-sm"></span> Applying… }
-            @else { Apply Changes }
-          </button>
-        </div>
-      </div>
-    </div>
+    <app-confirm-dialog
+      [title]="'Confirm Date Changes'"
+      [subtitle]="confirmSubtitle()"
+      [items]="confirmItems()"
+      [confirmLabel]="'Apply Changes'"
+      [isSaving]="isSaving()"
+      [error]="error()"
+      (confirmed)="apply()"
+      (cancelled)="showConfirm.set(false)"
+    />
   }
 
 </div>

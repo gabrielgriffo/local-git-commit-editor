@@ -110,9 +110,9 @@
         <div class="adjust-section">
           <span class="adj-label">Weeks &amp; Months</span>
           <div class="adj-row">
+            <button class="adj-pill neg" (click)="addDelta(-30 * 86400)">-1mo</button>
             <button class="adj-pill neg" (click)="addDelta(-7 * 86400)">-1w</button>
             <button class="adj-pill pos" (click)="addDelta(7 * 86400)">+1w</button>
-            <button class="adj-pill neg" (click)="addDelta(-30 * 86400)">-1mo</button>
             <button class="adj-pill pos" (click)="addDelta(30 * 86400)">+1mo</button>
           </div>
         </div>
@@ -158,44 +158,17 @@
 
   <!-- ── Confirmation overlay ──────────────────────────────────────── -->
   @if (showConfirm()) {
-    <div class="overlay anim-fade-in" (click)="showConfirm.set(false)">
-      <div class="confirm-dialog anim-scale-in" (click)="$event.stopPropagation()">
-        <div class="dialog-header">
-          <h2>Confirm Batch Shift</h2>
-          <p>{{ selectedCount() }} commit(s) will be shifted by
-            <strong [class.delta-pos]="pendingDelta() > 0" [class.delta-neg]="pendingDelta() < 0">{{ formatDelta(pendingDelta()) }}</strong>.
-          </p>
-          <p class="warn">This rewrites history — all shifted commits and their descendants will receive new SHAs.</p>
-        </div>
-        <div class="dialog-body">
-          @for (row of selectedRows(); track row.commit.sha) {
-            <div class="dialog-preview-item">
-              <code class="hash-chip">{{ row.commit.short_sha }}</code>
-              <span class="dialog-preview-msg">{{ row.commit.title }}</span>
-              <div class="dialog-preview-times mono">
-                <span class="old">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
-                <span>→</span>
-                <span class="new"
-                      [class.time-pos]="pendingDelta() > 0"
-                      [class.time-neg]="pendingDelta() < 0">
-                  {{ row.previewTime! | formatDate: 'datetime' }}
-                </span>
-              </div>
-            </div>
-          }
-        </div>
-        @if (error()) {
-          <p class="error-inline">{{ error() }}</p>
-        }
-        <div class="dialog-footer">
-          <button class="btn btn-ghost" (click)="showConfirm.set(false)">Cancel</button>
-          <button class="btn btn-primary" (click)="apply()" [disabled]="isSaving()">
-            @if (isSaving()) { <span class="spinner-sm"></span> Applying… }
-            @else { Apply Shift }
-          </button>
-        </div>
-      </div>
-    </div>
+    <app-confirm-dialog
+      [title]="'Confirm Batch Shift'"
+      [subtitle]="confirmSubtitle()"
+      [warning]="'This rewrites history — all shifted commits and their descendants will receive new SHAs.'"
+      [items]="confirmItems()"
+      [confirmLabel]="'Apply Shift'"
+      [isSaving]="isSaving()"
+      [error]="error()"
+      (confirmed)="apply()"
+      (cancelled)="showConfirm.set(false)"
+    />
   }
 
 </div>

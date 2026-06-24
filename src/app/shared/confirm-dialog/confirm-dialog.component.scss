@@ -1,0 +1,121 @@
+:host { display: contents; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.dialog {
+  width: 560px;
+  max-height: 80vh;
+  background: var(--surface-2);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialog-header {
+  padding: var(--sp-5) var(--sp-6);
+  border-bottom: 1px solid var(--border);
+  h2 { font-size: var(--text-lg); font-weight: 600; margin-bottom: 4px; }
+  p  { font-size: var(--text-sm); color: var(--ink-2); }
+  .warn { color: var(--warning); font-size: var(--text-xs); margin-top: 4px; }
+}
+
+.dialog-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4) var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--sp-3);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.preview-item-top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  overflow: hidden;
+}
+
+.preview-msg {
+  font-size: var(--text-sm);
+  color: var(--ink-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.preview-times {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+
+  .old { text-decoration: line-through; }
+  .arr { color: var(--ink-4); }
+  .new { color: var(--ink-2); font-weight: 500; }
+  .time-pos { color: var(--success); }
+  .time-neg { color: var(--danger); }
+}
+
+.diff-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 1px 5px;
+  border-radius: 10px;
+
+  &.diff-pos {
+    color: var(--success);
+    background: var(--success-lo);
+    border: 1px solid rgba(86,211,100,0.2);
+  }
+  &.diff-neg {
+    color: var(--danger);
+    background: var(--danger-lo);
+    border: 1px solid rgba(224,82,82,0.2);
+  }
+}
+
+.error-inline {
+  padding: 0 var(--sp-6);
+  color: var(--danger);
+  font-size: var(--text-sm);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-6);
+  border-top: 1px solid var(--border);
+}
+
+.spinner-sm {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

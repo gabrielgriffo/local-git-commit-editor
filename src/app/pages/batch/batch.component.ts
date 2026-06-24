@@ -1,11 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { CommitInfo } from '../../core/models/commit.model';
 import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
 import { IconComponent } from '../../shared/icon/icon.component';
+import { ConfirmDialogComponent, ConfirmDialogItem } from '../../shared/confirm-dialog/confirm-dialog.component';
 
 interface BatchRow {
   commit: CommitInfo;
@@ -16,7 +16,7 @@ interface BatchRow {
 @Component({
   selector: 'app-batch',
   standalone: true,
-  imports: [FormsModule, FormatDatePipe, IconComponent],
+  imports: [FormsModule, FormatDatePipe, IconComponent, ConfirmDialogComponent],
   templateUrl: './batch.component.html',
   styleUrl: './batch.component.scss',
   host: {
@@ -25,7 +25,6 @@ interface BatchRow {
   }
 })
 export class BatchComponent implements OnInit {
-  private router = inject(Router);
   private repo   = inject(RepositoryService);
   private edit   = inject(CommitEditService);
 
@@ -40,6 +39,19 @@ export class BatchComponent implements OnInit {
   protected hasPreview      = computed(() => this.pendingDelta() !== 0 && this.selectedCount() > 0);
   protected editableRows    = computed(() => this.rows().filter(r => !r.commit.is_pushed));
   protected allSelected     = computed(() => this.editableRows().length > 0 && this.editableRows().every(r => r.selected));
+
+  protected confirmItems = computed<ConfirmDialogItem[]>(() =>
+    this.selectedRows().map(r => ({
+      sha: r.commit.short_sha,
+      title: r.commit.title,
+      oldTime: r.commit.author_time,
+      newTime: r.previewTime!,
+    }))
+  );
+
+  protected confirmSubtitle = computed(() =>
+    `${this.selectedCount()} commit(s) will be shifted by ${this.formatDelta(this.pendingDelta())}.`
+  );
 
   ngOnInit(): void {
     const preselected = new Set(this.repo.selectedList().map(c => c.sha));
@@ -110,7 +122,7 @@ export class BatchComponent implements OnInit {
     try {
       await this.edit.applyBatchDateShift(shaList, delta);
       this.showConfirm.set(false);
-      this.router.navigate(['/repo/commits']);
+      await this.refresh();
     } catch { /* error via computed */ }
   }
 }
