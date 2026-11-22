@@ -67,7 +67,7 @@
       <div class="recent-section">
         <span class="recent-label">Recent</span>
         @for (p of recentRepos(); track p) {
-          <button class="recent-item" (click)="open(p)">
+          <button class="recent-item" (click)="open(p)" [disabled]="isLoading()">
             <app-icon name="folder-recent" />
             <span class="recent-name">{{ baseName(p) }}</span>
             <span class="recent-path">{{ p }}</span>

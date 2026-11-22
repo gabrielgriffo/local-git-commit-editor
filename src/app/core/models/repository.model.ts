@@ -14,4 +14,11 @@ export interface BackupInfo {
   branch: string;
   head_sha: string;
   description: string;
+  head_ref?: string | null;
+}
+
+export interface RewriteImpact {
+  commit_count: number;
+  signed_count: number;
+  affected_refs: string[];
 }

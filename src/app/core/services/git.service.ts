@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 import { CommitInfo } from '../models/commit.model';
-import { RepositoryInfo, BackupInfo } from '../models/repository.model';
+import { RepositoryInfo, BackupInfo, RewriteImpact } from '../models/repository.model';
 import { DateEditOperation } from '../models/edit-operation.model';
 
 @Injectable({ providedIn: 'root' })
@@ -18,16 +18,20 @@ export class GitService {
     return invoke<CommitInfo[]>('get_unpushed_commits', { repoPath });
   }
 
-  applyMessageEdit(repoPath: string, sha: string, newMessage: string): Promise<void> {
-    return invoke<void>('apply_message_edit', { repoPath, sha, newMessage });
+  rewriteImpact(repoPath: string, shaList: string[]): Promise<RewriteImpact> {
+    return invoke<RewriteImpact>('rewrite_impact', { repoPath, shaList });
   }
 
-  applyBatchDateShift(repoPath: string, shaList: string[], deltaSeconds: number): Promise<void> {
-    return invoke<void>('apply_batch_date_shift', { repoPath, shaList, deltaSeconds });
+  applyMessageEdit(repoPath: string, sha: string, newMessage: string): Promise<Record<string, string>> {
+    return invoke<Record<string, string>>('apply_message_edit', { repoPath, sha, newMessage });
   }
 
-  applyAbsoluteDateEdits(repoPath: string, operations: DateEditOperation[]): Promise<void> {
-    return invoke<void>('apply_absolute_date_edits', { repoPath, operations });
+  applyBatchDateShift(repoPath: string, shaList: string[], deltaSeconds: number): Promise<Record<string, string>> {
+    return invoke<Record<string, string>>('apply_batch_date_shift', { repoPath, shaList, deltaSeconds });
+  }
+
+  applyAbsoluteDateEdits(repoPath: string, operations: DateEditOperation[]): Promise<Record<string, string>> {
+    return invoke<Record<string, string>>('apply_absolute_date_edits', { repoPath, operations });
   }
 
   createBackup(repoPath: string): Promise<BackupInfo> {
@@ -38,8 +42,8 @@ export class GitService {
     return invoke<BackupInfo[]>('list_backups', { repoPath });
   }
 
-  restoreBackup(repoPath: string, backupId: string): Promise<void> {
-    return invoke<void>('restore_backup', { repoPath, backupId });
+  restoreBackup(repoPath: string, backupId: string): Promise<BackupInfo> {
+    return invoke<BackupInfo>('restore_backup', { repoPath, backupId });
   }
 
   deleteBackup(repoPath: string, backupId: string): Promise<void> {

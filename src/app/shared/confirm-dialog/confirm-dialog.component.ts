@@ -1,11 +1,13 @@
 import { Component, input, output } from '@angular/core';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
+import { formatDelta } from '../../core/utils/time';
 
 export interface ConfirmDialogItem {
   sha: string;
   title: string;
   oldTime: number;
   newTime: number;
+  offset: number | null;
 }
 
 @Component({
@@ -14,11 +16,13 @@ export interface ConfirmDialogItem {
   imports: [FormatDatePipe],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
+  host: { '(document:keydown.escape)': 'onEscape()' },
 })
 export class ConfirmDialogComponent {
   title        = input.required<string>();
   subtitle     = input.required<string>();
   warning      = input<string | null>(null);
+  notices      = input<string[]>([]);
   items        = input.required<ConfirmDialogItem[]>();
   confirmLabel = input<string>('Apply');
   isSaving     = input<boolean>(false);
@@ -28,13 +32,10 @@ export class ConfirmDialogComponent {
   cancelled = output<void>();
 
   protected timeDiff(oldTime: number, newTime: number): string {
-    const diff = newTime - oldTime;
-    if (diff === 0) return '';
-    const abs = Math.abs(diff);
-    const sign = diff > 0 ? '+' : '-';
-    if (abs < 3600) return `${sign}${Math.round(abs / 60)}m`;
-    if (abs < 86400) return `${sign}${Math.round(abs / 3600)}h`;
-    if (abs < 86400 * 7) return `${sign}${Math.round(abs / 86400)}d`;
-    return `${sign}${Math.round(abs / 86400 / 7)}w`;
+    return formatDelta(newTime - oldTime);
+  }
+
+  protected onEscape(): void {
+    if (!this.isSaving()) this.cancelled.emit();
   }
 }

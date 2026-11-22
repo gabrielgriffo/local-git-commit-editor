@@ -17,6 +17,9 @@ export class RepositoryService {
   readonly isLoading  = signal(false);
   readonly error      = signal<string | null>(null);
 
+  private openSeq = 0;
+  private loadSeq = 0;
+
   readonly filteredCommits = computed(() => {
     const q = this.search().trim().toLowerCase();
     if (!q) return this.commits();
@@ -33,7 +36,9 @@ export class RepositoryService {
     return this.commits().filter(c => sel.has(c.sha));
   });
 
-  readonly selectedCount = computed(() => this.selected().size);
+  readonly selectedCount = computed(() => this.selectedList().length);
+
+  readonly hasRemote = computed(() => this.repoInfo()?.has_remote ?? false);
 
   readonly unpushedCount = computed(() =>
     this.repoInfo()?.unpushed_count ?? 0
@@ -53,20 +58,25 @@ export class RepositoryService {
   }
 
   async openRepository(path: string): Promise<void> {
+    const seq = ++this.openSeq;
     this.isLoading.set(true);
     this.error.set(null);
     try {
       const info = await this.git.openRepository(path);
+      if (seq !== this.openSeq) return;
       this.repoPath.set(info.path);
       this.repoInfo.set(info);
+      this.commits.set([]);
+      this.selected.set(new Set());
       this.saveRecent(info.path);
       await this.loadCommits();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      this.error.set(msg);
+      if (seq === this.openSeq) {
+        this.error.set(e instanceof Error ? e.message : String(e));
+      }
       throw e;
     } finally {
-      this.isLoading.set(false);
+      if (seq === this.openSeq) this.isLoading.set(false);
     }
   }
 
@@ -74,18 +84,23 @@ export class RepositoryService {
     const path  = this.repoPath();
     const limit = this.settings.commitLimit();
     if (!path) return;
+    const seq = ++this.loadSeq;
     this.isLoading.set(true);
+    this.error.set(null);
     try {
       const [list, info] = await Promise.all([
         this.git.getCommits(path, limit, offset),
         this.git.openRepository(path),
       ]);
+      if (seq !== this.loadSeq || this.repoPath() !== path) return;
       this.commits.set(list);
       this.repoInfo.set(info);
     } catch (e: unknown) {
-      this.error.set(e instanceof Error ? e.message : String(e));
+      if (seq === this.loadSeq && this.repoPath() === path) {
+        this.error.set(e instanceof Error ? e.message : String(e));
+      }
     } finally {
-      this.isLoading.set(false);
+      if (seq === this.loadSeq) this.isLoading.set(false);
     }
   }
 
@@ -94,7 +109,7 @@ export class RepositoryService {
     if (!path) return;
     try {
       const info = await this.git.openRepository(path);
-      this.repoInfo.set(info);
+      if (this.repoPath() === path) this.repoInfo.set(info);
     } catch { /* silent */ }
   }
 
@@ -104,8 +119,16 @@ export class RepositoryService {
     this.selected.set(next);
   }
 
-  selectAll(): void {
-    this.selected.set(new Set(this.commits().map(c => c.sha)));
+  setSelection(shas: string[]): void {
+    this.selected.set(new Set(shas));
+  }
+
+  remapSelection(mapping: Record<string, string>): void {
+    const existing = new Set(this.commits().map(c => c.sha));
+    const next = [...this.selected()]
+      .map(sha => mapping[sha] ?? sha)
+      .filter(sha => existing.has(sha));
+    this.selected.set(new Set(next));
   }
 
   clearSelection(): void {
@@ -117,11 +140,14 @@ export class RepositoryService {
   }
 
   closeRepository(): void {
+    this.openSeq++;
+    this.loadSeq++;
     this.repoPath.set(null);
     this.repoInfo.set(null);
     this.commits.set([]);
     this.selected.set(new Set());
     this.error.set(null);
+    this.isLoading.set(false);
     // recent list is intentionally preserved so the welcome screen can show it
   }
 }

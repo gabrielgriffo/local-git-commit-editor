@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { CommitInfo } from '../../core/models/commit.model';
 import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatDelta } from '../../core/utils/time';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
 import { IconComponent } from '../../shared/icon/icon.component';
 import { ConfirmDialogComponent, ConfirmDialogItem } from '../../shared/confirm-dialog/confirm-dialog.component';
@@ -27,10 +29,12 @@ interface BatchRow {
 export class BatchComponent implements OnInit {
   private repo   = inject(RepositoryService);
   private edit   = inject(CommitEditService);
+  private settings = inject(SettingsService);
 
   protected rows       = signal<BatchRow[]>([]);
   protected pendingDelta = signal<number>(0);
   protected showConfirm  = signal(false);
+  protected notices      = signal<string[]>([]);
   protected isSaving     = computed(() => this.edit.isApplying());
   protected error        = computed(() => this.edit.lastError());
 
@@ -45,7 +49,8 @@ export class BatchComponent implements OnInit {
       sha: r.commit.short_sha,
       title: r.commit.title,
       oldTime: r.commit.author_time,
-      newTime: r.previewTime!,
+      newTime: r.commit.author_time + this.pendingDelta(),
+      offset: r.commit.author_offset,
     }))
   );
 
@@ -89,6 +94,10 @@ export class BatchComponent implements OnInit {
   }
 
   protected clearPreview(): void {
+    if (this.showConfirm()) {
+      if (!this.isSaving()) this.showConfirm.set(false);
+      return;
+    }
     this.pendingDelta.set(0);
     this.rows.update(rows => rows.map(r => ({ ...r, previewTime: null })));
   }
@@ -102,12 +111,19 @@ export class BatchComponent implements OnInit {
   }
 
   protected formatDelta(delta: number): string {
-    const abs = Math.abs(delta);
-    const sign = delta >= 0 ? '+' : '-';
-    if (abs < 3600) return `${sign}${Math.round(abs / 60)}m`;
-    if (abs < 86400) return `${sign}${Math.round(abs / 3600)}h`;
-    if (abs < 86400 * 7) return `${sign}${Math.round(abs / 86400)}d`;
-    return `${sign}${Math.round(abs / 86400 / 7)}w`;
+    return formatDelta(delta) || '+0m';
+  }
+
+  protected async requestApply(): Promise<void> {
+    if (!this.hasPreview()) return;
+    if (!this.settings.confirmEdits()) {
+      await this.apply();
+      return;
+    }
+    this.edit.clearError();
+    this.notices.set([]);
+    this.showConfirm.set(true);
+    this.notices.set(await this.edit.impactNotices(this.selectedRows().map(r => r.commit.sha)));
   }
 
   protected async refresh(): Promise<void> {
@@ -122,6 +138,7 @@ export class BatchComponent implements OnInit {
     try {
       await this.edit.applyBatchDateShift(shaList, delta);
       this.showConfirm.set(false);
+      this.pendingDelta.set(0);
       await this.refresh();
     } catch { /* error via computed */ }
   }

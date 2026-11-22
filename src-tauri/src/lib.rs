@@ -1,70 +1,102 @@
 mod git_ops;
 mod backup;
+#[cfg(test)]
+mod test_support;
 
-use git_ops::{CommitInfo, DateEditOperation, RepositoryInfo};
+use git_ops::{CommitInfo, DateEditOperation, RepositoryInfo, RewriteImpact, RewriteMap};
 use backup::BackupInfo;
+use std::sync::Mutex;
+
+static WRITE_LOCK: Mutex<()> = Mutex::new(());
+
+async fn blocking<T, F>(f: F) -> Result<T, String>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+{
+    tauri::async_runtime::spawn_blocking(f)
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+async fn blocking_write<T, F>(f: F) -> Result<T, String>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+{
+    blocking(move || {
+        let _guard = WRITE_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        f()
+    })
+    .await
+}
 
 // ─── Repository commands ──────────────────────────────────────────────────────
 
 #[tauri::command]
-fn open_repository(path: &str) -> Result<RepositoryInfo, String> {
-    git_ops::open_repository(path)
+async fn open_repository(path: String) -> Result<RepositoryInfo, String> {
+    blocking(move || git_ops::open_repository(&path)).await
 }
 
 #[tauri::command]
-fn get_commits(repo_path: &str, limit: usize, offset: usize) -> Result<Vec<CommitInfo>, String> {
-    git_ops::get_commits(repo_path, limit, offset)
+async fn get_commits(repo_path: String, limit: usize, offset: usize) -> Result<Vec<CommitInfo>, String> {
+    blocking(move || git_ops::get_commits(&repo_path, limit, offset)).await
 }
 
 #[tauri::command]
-fn get_unpushed_commits(repo_path: &str) -> Result<Vec<CommitInfo>, String> {
-    git_ops::get_unpushed_commits(repo_path)
+async fn get_unpushed_commits(repo_path: String) -> Result<Vec<CommitInfo>, String> {
+    blocking(move || git_ops::get_unpushed_commits(&repo_path)).await
 }
 
 // ─── Edit commands ────────────────────────────────────────────────────────────
 
 #[tauri::command]
-fn apply_message_edit(repo_path: &str, sha: &str, new_message: &str) -> Result<(), String> {
-    git_ops::apply_message_edit(repo_path, sha, new_message)
+async fn rewrite_impact(repo_path: String, sha_list: Vec<String>) -> Result<RewriteImpact, String> {
+    blocking(move || git_ops::rewrite_impact(&repo_path, &sha_list)).await
 }
 
 #[tauri::command]
-fn apply_batch_date_shift(
-    repo_path: &str,
+async fn apply_message_edit(repo_path: String, sha: String, new_message: String) -> Result<RewriteMap, String> {
+    blocking_write(move || git_ops::apply_message_edit(&repo_path, &sha, &new_message)).await
+}
+
+#[tauri::command]
+async fn apply_batch_date_shift(
+    repo_path: String,
     sha_list: Vec<String>,
     delta_seconds: i64,
-) -> Result<(), String> {
-    git_ops::apply_batch_date_shift(repo_path, &sha_list, delta_seconds)
+) -> Result<RewriteMap, String> {
+    blocking_write(move || git_ops::apply_batch_date_shift(&repo_path, &sha_list, delta_seconds)).await
 }
 
 #[tauri::command]
-fn apply_absolute_date_edits(
-    repo_path: &str,
+async fn apply_absolute_date_edits(
+    repo_path: String,
     operations: Vec<DateEditOperation>,
-) -> Result<(), String> {
-    git_ops::apply_absolute_date_edits(repo_path, &operations)
+) -> Result<RewriteMap, String> {
+    blocking_write(move || git_ops::apply_absolute_date_edits(&repo_path, &operations)).await
 }
 
 // ─── Backup commands ──────────────────────────────────────────────────────────
 
 #[tauri::command]
-fn create_backup(repo_path: &str) -> Result<BackupInfo, String> {
-    backup::create_backup(repo_path)
+async fn create_backup(repo_path: String) -> Result<BackupInfo, String> {
+    blocking_write(move || backup::create_backup(&repo_path)).await
 }
 
 #[tauri::command]
-fn list_backups(repo_path: &str) -> Result<Vec<BackupInfo>, String> {
-    backup::list_backups(repo_path)
+async fn list_backups(repo_path: String) -> Result<Vec<BackupInfo>, String> {
+    blocking(move || backup::list_backups(&repo_path)).await
 }
 
 #[tauri::command]
-fn restore_backup(repo_path: &str, backup_id: &str) -> Result<(), String> {
-    backup::restore_backup(repo_path, backup_id)
+async fn restore_backup(repo_path: String, backup_id: String) -> Result<BackupInfo, String> {
+    blocking_write(move || backup::restore_backup(&repo_path, &backup_id)).await
 }
 
 #[tauri::command]
-fn delete_backup(repo_path: &str, backup_id: &str) -> Result<(), String> {
-    backup::delete_backup(repo_path, backup_id)
+async fn delete_backup(repo_path: String, backup_id: String) -> Result<(), String> {
+    blocking_write(move || backup::delete_backup(&repo_path, &backup_id)).await
 }
 
 // ─── App entry point ──────────────────────────────────────────────────────────
@@ -91,6 +123,7 @@ pub fn run() {
             open_repository,
             get_commits,
             get_unpushed_commits,
+            rewrite_impact,
             apply_message_edit,
             apply_batch_date_shift,
             apply_absolute_date_edits,

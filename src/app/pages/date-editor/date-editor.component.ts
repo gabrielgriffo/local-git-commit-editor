@@ -4,6 +4,8 @@ import { CommitInfo, commitStatus } from '../../core/models/commit.model';
 import { DateEditOperation } from '../../core/models/edit-operation.model';
 import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatDelta, formatOffset, fromWallClock, shiftCommitter, toWallClock } from '../../core/utils/time';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
 import { IconComponent } from '../../shared/icon/icon.component';
 import { ConfirmDialogComponent, ConfirmDialogItem } from '../../shared/confirm-dialog/confirm-dialog.component';
@@ -36,10 +38,12 @@ interface TimelineItem {
 export class DateEditorComponent implements OnInit {
   private repo   = inject(RepositoryService);
   private edit   = inject(CommitEditService);
+  private settings = inject(SettingsService);
 
   protected rows        = signal<CommitDateEdit[]>([]);
   protected activeIdx   = signal<number>(0);
   protected showConfirm = signal(false);
+  protected notices     = signal<string[]>([]);
   protected isSaving    = computed(() => this.edit.isApplying());
   protected error       = computed(() => this.edit.lastError());
   protected anyChanged   = computed(() => this.rows().some(r => r.changed));
@@ -53,15 +57,19 @@ export class DateEditorComponent implements OnInit {
         title: r.commit.title,
         oldTime: r.commit.author_time,
         newTime: r.newAuthorTime,
+        offset: r.commit.author_offset,
       }))
   );
 
   protected confirmSubtitle = computed(() =>
     `${this.changedCount()} commit(s) will be rewritten.`
   );
-  protected activeRow    = computed(() => this.rows()[this.activeIdx()] ?? null);
+  protected activeRow    = computed<CommitDateEdit | null>(() => this.rows()[this.activeIdx()] ?? null);
   protected activeIsPushed = computed(() => this.activeRow()?.commit.is_pushed ?? false);
-  protected commitStatus = commitStatus;
+  protected offsetLabel  = computed(() => {
+    const row = this.activeRow();
+    return row ? formatOffset(row.commit.author_offset) : '';
+  });
 
   protected dateInput = signal('');
   protected timeInput = signal('');
@@ -95,7 +103,7 @@ export class DateEditorComponent implements OnInit {
       const np = pct(r.newAuthorTime);
       return {
         sha: r.commit.sha,
-        status: commitStatus(r.commit),
+        status: commitStatus(r.commit, this.repo.hasRemote()),
         origPct: op,
         newPct: np,
         lineLeft: Math.min(op, np),
@@ -124,30 +132,28 @@ export class DateEditorComponent implements OnInit {
     this.activeIdx.set(idx);
     const row = this.rows()[idx];
     if (!row) return;
-    const d = new Date(row.newAuthorTime * 1000);
-    this.dateInput.set(this.toDateString(d));
-    this.timeInput.set(this.toTimeString(d));
+    const wall = toWallClock(row.newAuthorTime, row.commit.author_offset);
+    this.dateInput.set(wall.date);
+    this.timeInput.set(wall.time);
   }
 
   protected applyInputToRow(): void {
     const idx = this.activeIdx();
     const rows = [...this.rows()];
+    if (!rows[idx]) return;
     const row = { ...rows[idx] };
     if (row.commit.is_pushed) return;
     const dateStr = this.dateInput();
     const timeStr = this.timeInput();
     if (!dateStr && !timeStr) return;
 
-    const orig = new Date(row.commit.author_time * 1000);
-    const [y, mo, d] = (dateStr || this.toDateString(orig)).split('-').map(Number);
-    const [h, mi] = (timeStr || this.toTimeString(orig)).split(':').map(Number);
+    const offset = row.commit.author_offset;
+    const orig = toWallClock(row.commit.author_time, offset);
+    const newSecs = fromWallClock(dateStr || orig.date, timeStr || orig.time, orig.seconds, offset);
+    if (newSecs === null) return;
 
-    const parsed = new Date(y, mo - 1, d, h, mi, orig.getSeconds());
-    if (isNaN(parsed.getTime())) return;
-
-    const newSecs = Math.floor(parsed.getTime() / 1000);
     row.newAuthorTime = newSecs;
-    row.newCommitterTime = newSecs;
+    row.newCommitterTime = shiftCommitter(row.commit.author_time, row.commit.committer_time, newSecs);
     row.changed = newSecs !== row.commit.author_time;
     rows[idx] = row;
     this.rows.set(rows);
@@ -188,6 +194,18 @@ export class DateEditorComponent implements OnInit {
     if (idx === this.activeIdx()) this.activateRow(idx);
   }
 
+  protected async requestApply(): Promise<void> {
+    if (!this.anyChanged()) return;
+    if (!this.settings.confirmEdits()) {
+      await this.apply();
+      return;
+    }
+    this.edit.clearError();
+    this.notices.set([]);
+    this.showConfirm.set(true);
+    this.notices.set(await this.edit.impactNotices(this.rows().filter(r => r.changed).map(r => r.commit.sha)));
+  }
+
   protected async apply(): Promise<void> {
     const ops: DateEditOperation[] = this.rows()
       .filter(r => r.changed)
@@ -207,25 +225,11 @@ export class DateEditorComponent implements OnInit {
   }
 
   protected timeDiff(orig: number, next: number): string {
-    const diff = next - orig;
-    if (diff === 0) return '';
-    const abs = Math.abs(diff);
-    const sign = diff > 0 ? '+' : '-';
-    if (abs < 3600) return `${sign}${Math.round(abs / 60)}m`;
-    if (abs < 86400) return `${sign}${Math.round(abs / 3600)}h`;
-    return `${sign}${Math.round(abs / 86400)}d`;
+    return formatDelta(next - orig);
   }
 
   protected async refresh(): Promise<void> {
     await this.repo.loadCommits();
     this.ngOnInit();
-  }
-
-  private toDateString(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
-
-  private toTimeString(d: Date): string {
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
 }

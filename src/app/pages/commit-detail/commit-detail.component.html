@@ -60,6 +60,9 @@
                     <app-icon name="warning-triangle" />
                     <span>This rewrites commit history. All descendants will receive new SHAs.</span>
                   </div>
+                  @for (notice of notices(); track notice) {
+                    <p class="error-inline">{{ notice }}</p>
+                  }
                   <div class="diff-block">
                     <div class="diff-side">
                       <span class="diff-label removed">Before</span>
@@ -126,6 +129,10 @@
                 </div>
               </div>
               <div class="utc-preview">
+                <span class="utc-label">Zone</span>
+                <code class="utc-value mono">{{ offsetLabel() }}</code>
+              </div>
+              <div class="utc-preview">
                 <span class="utc-label">UTC</span>
                 <code class="utc-value mono">{{ utcPreview() }}</code>
               </div>
@@ -143,10 +150,13 @@
                     <app-icon name="warning-triangle" />
                     <span>This rewrites commit history. All descendants will receive new SHAs.</span>
                   </div>
+                  @for (notice of notices(); track notice) {
+                    <p class="error-inline">{{ notice }}</p>
+                  }
                   <div class="diff-block">
                     <div class="diff-side">
                       <span class="diff-label removed">Before</span>
-                      <pre class="diff-text">{{ c.author_time | formatDate: 'datetime' }}</pre>
+                      <pre class="diff-text">{{ c.author_time | formatDate: 'datetime' : c.author_offset }}</pre>
                     </div>
                     <div class="diff-arrow">→</div>
                     <div class="diff-side">
@@ -155,7 +165,7 @@
                             [class.removed]="newAuthorTime() < c.author_time">After</span>
                       <pre class="diff-text"
                            [class.time-pos]="newAuthorTime() > c.author_time"
-                           [class.time-neg]="newAuthorTime() < c.author_time">{{ newAuthorTime() | formatDate: 'datetime' }}</pre>
+                           [class.time-neg]="newAuthorTime() < c.author_time">{{ newAuthorTime() | formatDate: 'datetime' : c.author_offset }}</pre>
                     </div>
                   </div>
                   <div class="confirm-actions">
@@ -173,7 +183,7 @@
             </div>
           } @else {
             <div class="date-display">
-              <span class="meta-val mono">{{ c.author_time | formatDate: 'datetime' }}</span>
+              <span class="meta-val mono">{{ c.author_time | formatDate: 'datetime' : c.author_offset }}</span>
               <span class="meta-rel">({{ c.author_time | relativeTime }})</span>
             </div>
           }
@@ -195,7 +205,7 @@
             </div>
             <div class="meta-row">
               <span class="meta-key">Author Date</span>
-              <span class="meta-val mono">{{ c.author_time | formatDate: 'datetime' }}
+              <span class="meta-val mono">{{ c.author_time | formatDate: 'datetime' : c.author_offset }}
                 <span class="meta-rel">({{ c.author_time | relativeTime }})</span>
               </span>
             </div>
@@ -205,7 +215,7 @@
             </div>
             <div class="meta-row">
               <span class="meta-key">Commit Date</span>
-              <span class="meta-val mono">{{ c.committer_time | formatDate: 'datetime' }}
+              <span class="meta-val mono">{{ c.committer_time | formatDate: 'datetime' : c.committer_offset }}
                 <span class="meta-rel">({{ c.committer_time | relativeTime }})</span>
               </span>
             </div>

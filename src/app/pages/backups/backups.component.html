@@ -3,7 +3,7 @@
   <div class="page-header">
     <h1>Backups</h1>
     <div class="header-spacer"></div>
-    <button class="btn btn-secondary btn-sm" (click)="createBackup()">
+    <button class="btn btn-secondary btn-sm" (click)="createBackup()" [disabled]="isBusy()">
       <app-icon name="plus" />
       Create Backup
     </button>
@@ -29,7 +29,7 @@
         <div class="empty-state">
           <p class="empty-title">No backups yet</p>
           <p class="empty-sub">Create a backup before making edits to preserve your history.</p>
-          <button class="btn btn-secondary" style="margin-top:var(--sp-4)" (click)="createBackup()">
+          <button class="btn btn-secondary" style="margin-top:var(--sp-4)" (click)="createBackup()" [disabled]="isBusy()">
             Create First Backup
           </button>
         </div>
@@ -53,7 +53,7 @@
                 <button
                   class="btn btn-secondary btn-sm"
                   (click)="restore(b)"
-                  [disabled]="restoringId() !== null">
+                  [disabled]="isBusy()">
                   @if (restoringId() === b.id) {
                     <span class="spinner-sm"></span> Restoring…
                   } @else {
@@ -62,8 +62,8 @@
                 </button>
                 <button
                   class="btn btn-danger btn-sm"
-                  (click)="deleteBackup(b)"
-                  [disabled]="restoringId() !== null">
+                  (click)="askDelete(b)"
+                  [disabled]="isBusy()">
                   Delete
                 </button>
               </div>
@@ -74,10 +74,22 @@
 
       <div class="safety-note">
         <app-icon name="shield" />
-        Backups are stored in <code>.git/lge-backups/</code> inside your repository. Restoring resets the branch HEAD — git reflog can recover further if needed.
+        Backups are stored in <code>.git/lge-backups/</code> and kept alive by <code>refs/lge-backups/</code>. Restoring moves the branch back and first saves the current state as a new backup.
       </div>
 
     </div>
   </div>
+
+  @if (pendingDelete(); as b) {
+    <app-confirm-dialog
+      [title]="'Delete Backup'"
+      [subtitle]="'Delete the backup ' + b.description + '? This cannot be undone.'"
+      [items]="[]"
+      [confirmLabel]="'Delete'"
+      [isSaving]="isDeleting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="pendingDelete.set(null)"
+    />
+  }
 
 </div>

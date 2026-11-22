@@ -47,6 +47,8 @@ export class WelcomeComponent implements OnDestroy {
     const s = raw.toLowerCase();
     if (s.includes('not a git repository') || s.includes('could not find repository'))
       return 'No Git repository found at this path. Make sure the folder contains a .git directory.';
+    if (s.includes('unbornbranch') || s.includes('no head'))
+      return 'This repository has no commits yet.';
     if (s.includes('permission denied') || s.includes('access is denied'))
       return 'Access denied — check that the folder is readable.';
     if (s.includes('no such file') || s.includes('not found') || s.includes('notfound'))
@@ -67,6 +69,7 @@ export class WelcomeComponent implements OnDestroy {
   }
 
   protected async open(pathOverride?: string): Promise<void> {
+    if (this.isLoading()) return;
     const p = pathOverride ?? this.path().trim();
     if (!p) { this.showError('Please enter a repository path.'); return; }
 

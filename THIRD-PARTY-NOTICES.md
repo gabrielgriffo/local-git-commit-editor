@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-This project includes icons from the following icon sets:
+This project includes the following third-party icons and fonts:
 
 ## Solar Icons
 
@@ -11,3 +11,15 @@ This project includes icons from the following icon sets:
 Icons may have been resized or recolored to fit this project; no other changes were made to the original artwork.
 
 The icon assets are distributed with their respective licenses. All trademarks and copyrights remain with their respective owners.
+
+## Inter
+
+* Source: [Inter](https://github.com/rsms/inter), packaged by [Fontsource](https://fontsource.org/fonts/inter)
+* License: [SIL Open Font License 1.1](https://openfontlicense.org/)
+* Used in: the application interface (bundled from `@fontsource/inter`)
+
+## JetBrains Mono
+
+* Source: [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono), packaged by [Fontsource](https://fontsource.org/fonts/jetbrains-mono)
+* License: [SIL Open Font License 1.1](https://openfontlicense.org/)
+* Used in: the application interface (bundled from `@fontsource/jetbrains-mono`)

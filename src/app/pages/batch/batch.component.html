@@ -6,7 +6,7 @@
     <div class="header-spacer"></div>
     @if (hasPreview()) {
       <button class="btn btn-ghost btn-sm" (click)="clearPreview()">Reset</button>
-      <button class="btn btn-primary btn-sm" (click)="showConfirm.set(true)">
+      <button class="btn btn-primary btn-sm" (click)="requestApply()" [disabled]="isSaving()">
         Apply to {{ selectedCount() }} commits
       </button>
     }
@@ -52,7 +52,7 @@
               <code class="col-hash hash-chip">{{ row.commit.short_sha }}</code>
               <span class="col-msg msg-text">{{ row.commit.title }}</span>
               <span class="col-author author-text">{{ row.commit.author_name }}</span>
-              <span class="col-time mono time-text">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
+              <span class="col-time mono time-text">{{ row.commit.author_time | formatDate: 'datetime' : row.commit.author_offset }}</span>
               <span class="col-status">
                 @if (row.commit.is_pushed) {
                   <span class="status-badge status-pushed">PUSHED</span>
@@ -128,12 +128,12 @@
                   <span class="preview-msg">{{ row.commit.title }}</span>
                 </div>
                 <div class="preview-times mono">
-                  <span class="orig-time">{{ row.commit.author_time | formatDate: 'datetime' }}</span>
+                  <span class="orig-time">{{ row.commit.author_time | formatDate: 'datetime' : row.commit.author_offset }}</span>
                   <span class="preview-arrow">→</span>
                   <span class="new-time-val"
                         [class.time-pos]="pendingDelta() > 0"
                         [class.time-neg]="pendingDelta() < 0">
-                    {{ row.previewTime! | formatDate: 'datetime' }}
+                    {{ row.previewTime! | formatDate: 'datetime' : row.commit.author_offset }}
                   </span>
                 </div>
               </div>
@@ -162,6 +162,7 @@
     <app-confirm-dialog
       [title]="'Confirm Batch Shift'"
       [subtitle]="confirmSubtitle()"
+      [notices]="notices()"
       [warning]="'This rewrites history — all shifted commits and their descendants will receive new SHAs.'"
       [items]="confirmItems()"
       [confirmLabel]="'Apply Shift'"

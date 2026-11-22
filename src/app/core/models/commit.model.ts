@@ -18,7 +18,7 @@ export interface CommitInfo {
   parent_shas: string[];
 }
 
-export function commitStatus(commit: CommitInfo): CommitStatus {
+export function commitStatus(commit: CommitInfo, hasRemote: boolean): CommitStatus {
   if (commit.is_pushed) return 'pushed';
-  return 'local';
+  return hasRemote ? 'unpushed' : 'local';
 }

@@ -6,6 +6,8 @@ import { CommitInfo, commitStatus } from '../../core/models/commit.model';
 import { DateEditOperation } from '../../core/models/edit-operation.model';
 import { CommitEditService } from '../../core/services/commit-edit.service';
 import { RepositoryService } from '../../core/services/repository.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { formatOffset, fromWallClock, shiftCommitter, toWallClock } from '../../core/utils/time';
 import { RelativeTimePipe } from '../../core/pipes/relative-time.pipe';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
 import { IconComponent } from '../../shared/icon/icon.component';
@@ -23,6 +25,7 @@ export class CommitDetailComponent implements OnInit {
   private router = inject(Router);
   private repo   = inject(RepositoryService);
   private edit   = inject(CommitEditService);
+  private settings = inject(SettingsService);
 
   protected commit   = signal<CommitInfo | null>(null);
   protected newMsg   = signal('');
@@ -30,11 +33,12 @@ export class CommitDetailComponent implements OnInit {
   protected confirm  = signal(false);
   protected isSaving = computed(() => this.edit.isApplying());
   protected error    = computed(() => this.edit.lastError());
+  protected notices  = signal<string[]>([]);
 
   protected isPushed = computed(() => this.commit()?.is_pushed ?? false);
   protected status   = computed(() => {
     const c = this.commit();
-    return c ? commitStatus(c) : 'local';
+    return c ? commitStatus(c, this.repo.hasRemote()) : 'local';
   });
 
   protected isDirty = computed(() => {
@@ -48,6 +52,11 @@ export class CommitDetailComponent implements OnInit {
   protected dateInput    = signal('');
   protected timeInput    = signal('');
   protected newAuthorTime = signal(0);
+
+  protected offsetLabel = computed(() => {
+    const c = this.commit();
+    return c ? formatOffset(c.author_offset) : '';
+  });
 
   protected utcPreview = computed(() =>
     new Date(this.newAuthorTime() * 1000).toISOString()
@@ -66,10 +75,27 @@ export class CommitDetailComponent implements OnInit {
     if (!found) { this.router.navigate(['/repo/commits']); return; }
     this.commit.set(found);
     this.newMsg.set(found.message);
-    this.newAuthorTime.set(found.author_time);
-    const d = new Date(found.author_time * 1000);
-    this.dateInput.set(this.toDateString(d));
-    this.timeInput.set(this.toTimeString(d));
+    this.resetDateInputs(found);
+  }
+
+  private resetDateInputs(c: CommitInfo): void {
+    this.newAuthorTime.set(c.author_time);
+    const wall = toWallClock(c.author_time, c.author_offset);
+    this.dateInput.set(wall.date);
+    this.timeInput.set(wall.time);
+  }
+
+  private async openConfirm(target: { set(v: boolean): void }, apply: () => Promise<void>): Promise<void> {
+    const c = this.commit();
+    if (!c) return;
+    if (!this.settings.confirmEdits()) {
+      await apply();
+      return;
+    }
+    this.edit.clearError();
+    this.notices.set([]);
+    target.set(true);
+    this.notices.set(await this.edit.impactNotices([c.sha]));
   }
 
   protected startEditing(): void {
@@ -85,7 +111,7 @@ export class CommitDetailComponent implements OnInit {
 
   protected requestConfirm(): void {
     if (!this.isDirty()) return;
-    this.confirm.set(true);
+    void this.openConfirm(this.confirm, () => this.applyEdit());
   }
 
   protected async applyEdit(): Promise<void> {
@@ -121,28 +147,21 @@ export class CommitDetailComponent implements OnInit {
     const c = this.commit();
     this.editingDate.set(false);
     this.confirmDate.set(false);
-    if (c) {
-      this.newAuthorTime.set(c.author_time);
-      const d = new Date(c.author_time * 1000);
-      this.dateInput.set(this.toDateString(d));
-      this.timeInput.set(this.toTimeString(d));
-    }
+    if (c) this.resetDateInputs(c);
   }
 
   protected applyDateInputToSignal(): void {
     const c = this.commit();
     if (!c) return;
-    const orig = new Date(c.author_time * 1000);
-    const [y, mo, day] = (this.dateInput() || this.toDateString(orig)).split('-').map(Number);
-    const [h, mi] = (this.timeInput() || this.toTimeString(orig)).split(':').map(Number);
-    const parsed = new Date(y, mo - 1, day, h, mi, orig.getSeconds());
-    if (isNaN(parsed.getTime())) return;
-    this.newAuthorTime.set(Math.floor(parsed.getTime() / 1000));
+    const orig = toWallClock(c.author_time, c.author_offset);
+    const secs = fromWallClock(this.dateInput() || orig.date, this.timeInput() || orig.time, orig.seconds, c.author_offset);
+    if (secs === null) return;
+    this.newAuthorTime.set(secs);
   }
 
   protected requestDateConfirm(): void {
     if (!this.isDateDirty()) return;
-    this.confirmDate.set(true);
+    void this.openConfirm(this.confirmDate, () => this.applyDateEdit());
   }
 
   protected async applyDateEdit(): Promise<void> {
@@ -153,7 +172,7 @@ export class CommitDetailComponent implements OnInit {
       sha: c.sha,
       author_time: newTime,
       author_offset: c.author_offset,
-      committer_time: newTime,
+      committer_time: shiftCommitter(c.author_time, c.committer_time, newTime),
       committer_offset: c.committer_offset,
     };
     try {
@@ -162,13 +181,5 @@ export class CommitDetailComponent implements OnInit {
       this.confirmDate.set(false);
       this.router.navigate(['/repo/commits']);
     } catch { /* error shown via computed */ }
-  }
-
-  private toDateString(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
-
-  private toTimeString(d: Date): string {
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
 }

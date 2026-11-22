@@ -7,6 +7,7 @@ import { RepositoryService } from '../../core/services/repository.service';
 import { RelativeTimePipe } from '../../core/pipes/relative-time.pipe';
 import { FormatDatePipe } from '../../core/pipes/format-date.pipe';
 import { IconComponent } from '../../shared/icon/icon.component';
+import { authorTimeRange } from '../../core/utils/time';
 
 @Component({
   selector: 'app-commits',
@@ -31,27 +32,25 @@ export class CommitsComponent implements OnInit {
     const base = this.repo.filteredCommits();
     const f = this.filter();
     if (f === 'all') return base;
-    return base.filter(c => {
-      const s = commitStatus(c);
-      if (f === 'local')    return s === 'local';
-      if (f === 'unpushed') return s === 'unpushed' || s === 'local';
-      if (f === 'pushed')   return s === 'pushed';
-      return true;
-    });
+    const hasRemote = this.repo.hasRemote();
+    return base.filter(c => commitStatus(c, hasRemote) === f);
   });
 
   protected totalCount    = computed(() => this.repo.commits().length);
   protected selectedCount = computed(() => this.repo.selectedCount());
   protected isLoading     = computed(() => this.repo.isLoading());
+  protected loadError     = computed(() => this.repo.error());
 
-  protected localCount    = computed(() => this.repo.commits().filter(c => commitStatus(c) === 'local').length);
-  protected unpushedCount = computed(() => this.repo.commits().filter(c => commitStatus(c) === 'unpushed').length);
+  protected localCount    = computed(() => this.countStatus('local'));
+  protected unpushedCount = computed(() => this.countStatus('unpushed'));
   protected pushedCount   = computed(() => this.repo.commits().filter(c => c.is_pushed).length);
 
+  private range = computed(() => authorTimeRange(this.repo.commits()));
+
   protected spanLabel = computed(() => {
-    const commits = this.repo.commits();
-    if (commits.length < 2) return '—';
-    const secs = commits[0].author_time - commits[commits.length - 1].author_time;
+    const range = this.range();
+    if (!range || this.repo.commits().length < 2) return '—';
+    const secs = range.newest - range.oldest;
     if (secs < 3600)      return `${Math.round(secs / 60)} min`;
     if (secs < 86400)     return `${(secs / 3600).toFixed(1)} hrs`;
     if (secs < 86400 * 7) return `${(secs / 86400).toFixed(1)} days`;
@@ -59,15 +58,19 @@ export class CommitsComponent implements OnInit {
   });
 
   protected newestLabel = computed(() => {
-    const c = this.repo.commits()[0];
-    return c ? new Date(c.author_time * 1000).toLocaleDateString() : '—';
+    const range = this.range();
+    return range ? new Date(range.newest * 1000).toLocaleDateString() : '—';
   });
 
   protected oldestLabel = computed(() => {
-    const commits = this.repo.commits();
-    const c = commits[commits.length - 1];
-    return c ? new Date(c.author_time * 1000).toLocaleDateString() : '—';
+    const range = this.range();
+    return range ? new Date(range.oldest * 1000).toLocaleDateString() : '—';
   });
+
+  private countStatus(status: 'local' | 'unpushed'): number {
+    const hasRemote = this.repo.hasRemote();
+    return this.repo.commits().filter(c => commitStatus(c, hasRemote) === status).length;
+  }
 
   ngOnInit(): void {
     this.repo.search.set('');
@@ -103,11 +106,17 @@ export class CommitsComponent implements OnInit {
   }
 
   protected onSelectAll(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (target && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
     event.preventDefault();
-    if (this.selectedCount() === this.displayedCommits().length) {
+    const shas = this.displayedCommits().map(c => c.sha);
+    const allSelected = shas.length > 0
+      && this.selectedCount() === shas.length
+      && shas.every(sha => this.repo.isSelected(sha));
+    if (allSelected) {
       this.repo.clearSelection();
     } else {
-      this.repo.selectAll();
+      this.repo.setSelection(shas);
     }
   }
 
@@ -120,11 +129,11 @@ export class CommitsComponent implements OnInit {
   }
 
   protected statusClass(commit: CommitInfo): string {
-    return commitStatus(commit);
+    return commitStatus(commit, this.repo.hasRemote());
   }
 
   protected statusLabel(commit: CommitInfo): string {
-    const s = commitStatus(commit);
+    const s = commitStatus(commit, this.repo.hasRemote());
     if (s === 'pushed') return 'Pushed';
     if (s === 'unpushed') return 'Unpushed';
     return 'Local';

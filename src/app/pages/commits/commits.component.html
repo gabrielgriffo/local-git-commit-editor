@@ -61,7 +61,14 @@
           <span class="panel-title">Commits</span>
         </div>
         <div class="list-body">
-        @if (isLoading()) {
+        @if (loadError()) {
+          <div class="empty-state">
+            <app-icon class="empty-icon" name="error-circle" />
+            <p class="empty-title">Failed to load commits</p>
+            <p class="empty-sub">{{ loadError() }}</p>
+            <button class="btn btn-secondary btn-sm" (click)="refresh()">Retry</button>
+          </div>
+        } @else if (isLoading()) {
           <div class="loading-state">
             @for (i of [1,2,3,4,5,6,7,8]; track i) {
               <div class="skeleton-card">
@@ -114,7 +121,7 @@
                   <div class="commit-meta">
                     <span class="author">{{ commit.author_name }}</span>
                     <span class="meta-sep">·</span>
-                    <span class="date mono">{{ commit.author_time | formatDate: 'datetime' }}</span>
+                    <span class="date mono">{{ commit.author_time | formatDate: 'datetime' : commit.author_offset }}</span>
                   </div>
                 </div>
               </div>
